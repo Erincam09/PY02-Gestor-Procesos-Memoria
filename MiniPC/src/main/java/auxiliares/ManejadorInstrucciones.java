@@ -215,6 +215,7 @@ public class ManejadorInstrucciones {
         return operando.equals("AX") || operando.equals("AL") || operando.equals("BX") || operando.equals("CX") || operando.equals("DX");
     }
 
+    /* 
     public int obtenerPeso(Instruccion instruccion) {
         String operacion = instruccion.getTipoOp().toUpperCase();
         if (operacion.equals("MOV") || operacion.equals("INC") || operacion.equals("DEC") || operacion.equals("SWAP") || operacion.equals("PUSH") || operacion.equals("POP")) {
@@ -241,4 +242,6 @@ public class ManejadorInstrucciones {
         }
         throw new IllegalArgumentException("Operación inválida: " + operacion);
     }
+
+    */
 }

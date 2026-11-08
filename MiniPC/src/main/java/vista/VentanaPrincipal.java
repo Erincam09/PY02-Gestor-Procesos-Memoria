@@ -61,8 +61,8 @@ public class VentanaPrincipal extends JFrame {
     // -------------------- CONSOLA --------------------
 
     private JTextArea txtPantalla;
-    private JTextField txtEntradaTeclado;
-    private JButton btnEnviarEntrada;
+    //private JTextField txtEntradaTeclado;
+    //private JButton btnEnviarEntrada;
 
     // -------------------- EJECUCIÓN --------------------
 
@@ -727,6 +727,7 @@ public class VentanaPrincipal extends JFrame {
                 BorderLayout.CENTER
         );
 
+        /* 
         JPanel entrada = new JPanel(
                 new BorderLayout(
                         8,
@@ -734,7 +735,9 @@ public class VentanaPrincipal extends JFrame {
                 )
         );
 
+        
         entrada.setOpaque(false);
+
 
         entrada.add(
                 etiquetaSecundaria(
@@ -743,30 +746,34 @@ public class VentanaPrincipal extends JFrame {
                 BorderLayout.WEST
         );
 
+        
         txtEntradaTeclado = crearCampo(
                 "",
                 14
         );
-
+        
         btnEnviarEntrada = crearBotonSecundario(
                 "Enviar"
         );
 
+        
         entrada.add(
                 txtEntradaTeclado,
                 BorderLayout.CENTER
         );
+        
 
         entrada.add(
                 btnEnviarEntrada,
                 BorderLayout.EAST
         );
+        
 
         consola.add(
                 entrada,
                 BorderLayout.SOUTH
         );
-
+         */
         return consola;
     }
 
@@ -1571,7 +1578,7 @@ public class VentanaPrincipal extends JFrame {
         btnSiguiente.setEnabled(false);
         btnEjecutarAutomatico.setEnabled(false);
         btnReiniciar.setEnabled(false);
-        btnEnviarEntrada.setEnabled(false);
+        //btnEnviarEntrada.setEnabled(false);
         btnEstadisticas.setEnabled(false);
     }
 
@@ -1714,15 +1721,15 @@ public class VentanaPrincipal extends JFrame {
     public JButton getBtnEstadisticas() {
         return btnEstadisticas;
     }
-
+    /*
     public JButton getBtnEnviarEntrada() {
         return btnEnviarEntrada;
     }
-
+    
     public JTextField getTxtEntradaTeclado() {
         return txtEntradaTeclado;
     }
-
+        */
     public JTextArea getTxtPantalla() {
         return txtPantalla;
     }

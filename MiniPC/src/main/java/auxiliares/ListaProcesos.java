@@ -1,10 +1,11 @@
 package auxiliares;
 import java.util.ArrayList;
 import modelo.Proceso;
+import modelo.ConfiguracionSistema;
 
 public class ListaProcesos {
     private ArrayList<Proceso> procesos;
-    private final int MAX_PROCESOS = 5;
+    private final int MAX_PROCESOS = ConfiguracionSistema.maxProcesosTotal;
 
     public ListaProcesos() {
         procesos = new ArrayList<>();

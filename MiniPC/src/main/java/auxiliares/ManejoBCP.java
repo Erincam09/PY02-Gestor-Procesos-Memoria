@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import modelo.BCP;
 import modelo.CPU;
 import modelo.Memoria;
+import modelo.ConfiguracionSistema;
 
 public class ManejoBCP {
 
@@ -15,8 +16,8 @@ public class ManejoBCP {
     }
 
     public BCP crearBCP(Memoria memoria, int pid, CPU cpu, int base, int alcance, int prioridad, String nombrePrograma, String ubicacion) {
-        if (listaBCP.size() >= 5) {
-            throw new IllegalArgumentException("Ya existen 5 procesos activos.");
+        if (listaBCP.size() >= ConfiguracionSistema.maxProcesosTotal) {
+            throw new IllegalArgumentException("Ya existen " + ConfiguracionSistema.maxProcesosTotal + " procesos activos.");
         }
 
         int direccionBCP = buscarEspacioBCP(memoria);
@@ -237,7 +238,7 @@ public class ManejoBCP {
     }
 
     public boolean hayEspacioParaBCP(Memoria memoria) {
-        return listaBCP.size() < 5 && buscarEspacioBCP(memoria) != -1;
+        return listaBCP.size() < ConfiguracionSistema.maxProcesosTotal && buscarEspacioBCP(memoria) != -1;
     }
 
     public int getTamanioBCP() {

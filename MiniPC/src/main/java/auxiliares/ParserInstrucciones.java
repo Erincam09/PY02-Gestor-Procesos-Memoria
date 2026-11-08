@@ -123,7 +123,7 @@ public class ParserInstrucciones {
         // INT 10H
         // INT 09H
         // INT 21H
-        if (linea.matches("(?i)^INT\\s+(20H|10H|09H|21H)$")) {
+        if (linea.matches("(?i)^INT\\s+(20H|10H|21H)$")) {
             return true;
         }
         // JMP +3

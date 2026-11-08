@@ -6,6 +6,10 @@ public class ConfiguracionSistema {
     private int almacenamientoSecundario;
     private int memoriaVirtual;
 
+    public static final int maxNucleos = 5;
+    public static final int maxProcesosXNucleo = 5;
+    public static final int maxProcesosTotal = maxNucleos * maxProcesosXNucleo;
+
     public ConfiguracionSistema() {
         memoriaPrincipal = 256;
         almacenamientoSecundario = 512;

@@ -68,12 +68,12 @@ public class MiniPCControlador {
     private int tiempoRestante;
     private long tiempoCPU;
     private long tiempoSistema;
-    private Timer timerEsperaInterrupcion;
+    //private Timer timerEsperaInterrupcion;
     private ArrayList<EstadisticaProceso> estadisticas;
-    private boolean reanudarAutomaticoDespuesInterrupcion;
+    //private boolean reanudarAutomaticoDespuesInterrupcion;
     private static final DateTimeFormatter FORMATO_HORA = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    private Proceso procesoEsperandoEntrada; 
+    //private Proceso procesoEsperandoEntrada; 
     private int direccionInstruccionActual = -1;
 
     public MiniPCControlador(VentanaPrincipal vista) {
@@ -86,7 +86,7 @@ public class MiniPCControlador {
 
     private void inicializarSistema() {
         detenerTimer();
-        reanudarAutomaticoDespuesInterrupcion = false;
+        //reanudarAutomaticoDespuesInterrupcion = false;
 
         cpu = new CPU();
         memoria = new Memoria(configuracion.getMemoriaPrincipal());
@@ -118,12 +118,12 @@ public class MiniPCControlador {
         tiempoRestante = -1;
         tiempoCPU = 0;
         tiempoSistema = 0;
-        timerEsperaInterrupcion = null;
-        procesoEsperandoEntrada = null;
+        //timerEsperaInterrupcion = null;
+        //procesoEsperandoEntrada = null;
 
         vista.mostrarConfiguracion(configuracion);
         vista.limpiarPantalla();
-        vista.getTxtEntradaTeclado().setText("");
+        //vista.getTxtEntradaTeclado().setText("");
         vista.setEstadoSistema("Sin programas cargados");
     }
 
@@ -133,8 +133,8 @@ public class MiniPCControlador {
         vista.getBtnSiguiente().addActionListener(e -> ejecutarUnSegundo());
         vista.getBtnEjecutarAutomatico().addActionListener(e -> iniciarAutomatico());
         vista.getBtnReiniciar().addActionListener(e -> reiniciarSistema());
-        vista.getBtnEnviarEntrada().addActionListener(e -> enviarEntradaTeclado());
-        vista.getTxtEntradaTeclado().addActionListener(e -> enviarEntradaTeclado());
+        /*vista.getBtnEnviarEntrada().addActionListener(e -> enviarEntradaTeclado());
+        vista.getTxtEntradaTeclado().addActionListener(e -> enviarEntradaTeclado());*/
         vista.getBtnEstadisticas().addActionListener(e -> mostrarEstadisticas());
     }
 
@@ -221,7 +221,7 @@ public class MiniPCControlador {
 
     private void admitirTrabajos() {
         while (planificador.hayTrabajosPendientes()) {
-            if (listaProcesos.cantidadProcesos() >= 5) {
+            if (listaProcesos.cantidadProcesos() >= ConfiguracionSistema.maxProcesosTotal) {
                 break;
             }
 
@@ -317,9 +317,7 @@ public class MiniPCControlador {
                 admitirTrabajos();
 
                 if (!despacharSiguienteProceso()) {
-                    if (procesoEsperandoEntrada != null) {
-                        vista.setEstadoSistema("Esperando entrada de teclado");
-                    } else if (todosTrabajosFinalizados()) {
+                    if (todosTrabajosFinalizados()) {
                         finalizarSimulacion();
                     } else if (planificador.hayTrabajosPendientes()) {
                         vista.setEstadoSistema("Hay trabajos pendientes esperando recursos");
@@ -410,7 +408,7 @@ public class MiniPCControlador {
         instruccionActual = programa.getInstrucciones().get(indice);
         cpu.setIR(instruccionActual.getEntradaTexto());
         manejoBCP.actualizarBCP(memoria, bcp, "EJECUCION", cpu);
-        pesoActual = manejadorInstrucciones.obtenerPeso(instruccionActual);
+        pesoActual = 1;
         tiempoRestante = pesoActual;
 
         return true;
@@ -445,10 +443,11 @@ public class MiniPCControlador {
                 cpu.setPC(cpu.getPC() + 1);
                 break;
 
+            
             case "09H":
-                ponerProcesoEnEsperaTeclado();
+                //ponerProcesoEnEsperaTeclado();
                 break;
-
+            
             case "21H":
                 ejecutarInterrupcionArchivos(proceso);
                 break;
@@ -511,6 +510,7 @@ public class MiniPCControlador {
         manejoBCP.sincronizarBCP(memoria, bcp);
     }
 
+    /* 
     private void ponerProcesoEnEsperaTeclado() {
         Proceso proceso = despachador.getProcesoActual();
         if (proceso == null) {
@@ -613,6 +613,8 @@ public class MiniPCControlador {
             timerEsperaInterrupcion.stop();
         }
     }
+
+    */
 
     private void finalizarProceso(Proceso proceso) {
         if (proceso == null) {
@@ -762,7 +764,7 @@ public class MiniPCControlador {
 
     private void finalizarSimulacion() {
         detenerTimer();
-        detenerTimerEsperaInterrupcion();
+        //detenerTimerEsperaInterrupcion();
 
         vista.setEstadoSistema("Simulación finalizada");
 
@@ -967,13 +969,13 @@ public class MiniPCControlador {
         boolean finalizada = todosTrabajosFinalizados();
 
         boolean puedeEjecutar = !todosTrabajosFinalizados()
-                && procesoEsperandoEntrada == null
+                //&& procesoEsperandoEntrada == null
                 && (despachador.hayProcesoActual() || hayProcesoPreparado());
 
         vista.getBtnSiguiente().setEnabled(puedeEjecutar && !automatico);
         vista.getBtnEjecutarAutomatico().setEnabled(puedeEjecutar && !automatico);
         vista.getBtnReiniciar().setEnabled(hayDatos);
-        vista.getBtnEnviarEntrada().setEnabled(procesoEsperandoEntrada != null);
+        //vista.getBtnEnviarEntrada().setEnabled(procesoEsperandoEntrada != null);
         vista.getBtnEstadisticas().setEnabled(finalizada && !estadisticas.isEmpty());
     }
 
