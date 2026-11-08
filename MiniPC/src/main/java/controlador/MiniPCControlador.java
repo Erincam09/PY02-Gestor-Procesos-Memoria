@@ -74,6 +74,7 @@ public class MiniPCControlador {
     private static final DateTimeFormatter FORMATO_HORA = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     private Proceso procesoEsperandoEntrada; 
+    private int direccionInstruccionActual = -1;
 
     public MiniPCControlador(VentanaPrincipal vista) {
         this.vista = vista;
@@ -206,7 +207,9 @@ public class MiniPCControlador {
             }
         }
         admitirTrabajos();
-
+        if (!despachador.hayProcesoActual()) {
+            despacharSiguienteProceso();
+        }
         if (cargados > 0) {
             vista.setEstadoSistema(cargados + " programa(s) cargado(s)");
         }
@@ -300,6 +303,7 @@ public class MiniPCControlador {
                 }
                 despachador.despachar(proceso);
                 manejoBCP.actualizarBCP(memoria, proceso.getBcp(), "EJECUCION", cpu);
+                prepararInstruccionActual();
                 return true;
             }
         }
@@ -402,7 +406,10 @@ public class MiniPCControlador {
             return false;
         }
 
+        direccionInstruccionActual = cpu.getPC();
         instruccionActual = programa.getInstrucciones().get(indice);
+        cpu.setIR(instruccionActual.getEntradaTexto());
+        manejoBCP.actualizarBCP(memoria, bcp, "EJECUCION", cpu);
         pesoActual = manejadorInstrucciones.obtenerPeso(instruccionActual);
         tiempoRestante = pesoActual;
 
@@ -563,6 +570,9 @@ public class MiniPCControlador {
         boolean continuarAutomatico = reanudarAutomaticoDespuesInterrupcion;
         reanudarAutomaticoDespuesInterrupcion = false;
         vista.setEstadoSistema("Proceso preparado");
+        if (!despachador.hayProcesoActual()) {
+            despacharSiguienteProceso();
+        }
         actualizarVistaCompleta();
         if (continuarAutomatico) {
             iniciarAutomatico();
@@ -800,7 +810,7 @@ public class MiniPCControlador {
             vista.getTblMemoria().clearSelection();
             return;
         }
-        int direccion = cpu.getPC()-1;
+        int direccion = direccionInstruccionActual;
         if (direccion < 0 || direccion >= memoria.getTamanio()) {
             vista.getTblMemoria().clearSelection();
             return;
@@ -918,6 +928,7 @@ public class MiniPCControlador {
         agregarDatoBCP(modelo, "BX", bcp.getBx());
         agregarDatoBCP(modelo, "CX", bcp.getCx());
         agregarDatoBCP(modelo, "DX", bcp.getDx());
+        agregarDatoBCP(modelo, "CMP", bcp.getComparacionIgual());
         agregarDatoBCP(modelo, "Pila", bcp.getPila());
         agregarDatoBCP(modelo, "CPU", bcp.getCpu());
         agregarDatoBCP(modelo, "Tiempo inicio", bcp.getTiempoInicio());
@@ -943,7 +954,7 @@ public class MiniPCControlador {
 
         vista.actualizarInfoEjecucion(
                 actual.getPid(),
-                instruccionActual == null ? null : instruccionActual.getEntradaTexto(),
+                cpu.getIR(),
                 pesoActual,
                 tiempoRestante,
                 tiempoCPU

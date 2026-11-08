@@ -7,7 +7,7 @@ import modelo.Memoria;
 
 public class ManejoBCP {
 
-    private static final int TAMANIO = 24;
+    private static final int TAMANIO = 25;
     private ArrayList<BCP> listaBCP;
 
     public ManejoBCP() {
@@ -136,31 +136,32 @@ public class ManejoBCP {
         memoria.escribir(inicio + 8, "CX: " + bcp.getCx());
         memoria.escribir(inicio + 9, "DX: " + bcp.getDx());
         memoria.escribir(inicio + 10, "IR: " + bcp.getIr());
+        memoria.escribir(inicio + 11, "CMP: " + bcp.getComparacionIgual());
 
         for (int i = 0; i < 5; i++) {
             Integer valor = bcp.getValorPila(i);
 
             if (valor == null) {
-                memoria.escribir(inicio + 11 + i, "PILA " + i + ": VACIO");
+                memoria.escribir(inicio + 12 + i, "PILA " + i + ": VACIO");
             } else {
-                memoria.escribir(inicio + 11 + i, "PILA " + i + ": " + valor);
+                memoria.escribir(inicio + 12 + i, "PILA " + i + ": " + valor);
             }
         }
 
-        memoria.escribir(inicio + 16, "CPU: " + bcp.getCpu());
-        memoria.escribir(inicio + 17, "TIEMPO INICIO: " + bcp.getTiempoInicio());
-        memoria.escribir(inicio + 18, "TIEMPO EMPLEADO: " + bcp.getTiempoEmpleado());
+        memoria.escribir(inicio + 17, "CPU: " + bcp.getCpu());
+        memoria.escribir(inicio + 18, "TIEMPO INICIO: " + bcp.getTiempoInicio());
+        memoria.escribir(inicio + 19, "TIEMPO EMPLEADO: " + bcp.getTiempoEmpleado());
 
         if (bcp.getArchivosAbiertos().isEmpty()) {
-            memoria.escribir(inicio + 19, "ARCHIVOS ABIERTOS: NINGUNO");
+            memoria.escribir(inicio + 20, "ARCHIVOS ABIERTOS: NINGUNO");
         } else {
-            memoria.escribir(inicio + 19, "ARCHIVOS ABIERTOS: " + bcp.getArchivosAbiertos());
+            memoria.escribir(inicio + 20, "ARCHIVOS ABIERTOS: " + bcp.getArchivosAbiertos());
         }
 
-        memoria.escribir(inicio + 20, "SIGUIENTE BCP: " + bcp.getSiguienteBCP());
-        memoria.escribir(inicio + 21, "BASE: " + bcp.getBase());
-        memoria.escribir(inicio + 22, "ALCANCE: " + bcp.getAlcance());
-        memoria.escribir(inicio + 23, "PRIORIDAD: " + bcp.getPrioridad());
+        memoria.escribir(inicio + 21, "SIGUIENTE BCP: " + bcp.getSiguienteBCP());
+        memoria.escribir(inicio + 22, "BASE: " + bcp.getBase());
+        memoria.escribir(inicio + 23, "ALCANCE: " + bcp.getAlcance());
+        memoria.escribir(inicio + 24, "PRIORIDAD: " + bcp.getPrioridad());
     }
 
     public void actualizarUbicacionPrograma(Memoria memoria, int pid, String ubicacion, int base) {

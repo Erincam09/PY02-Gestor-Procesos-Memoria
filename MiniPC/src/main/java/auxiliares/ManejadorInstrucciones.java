@@ -49,20 +49,20 @@ public class ManejadorInstrucciones {
                 ejecutarSWAP(instruccion);
                 break;
             case "CMP":
-                ejecutarCMP(instruccion);
+                ejecutarCMP(instruccion, bcp);
                 break;
             case "JMP":
                 ejecutarSalto(instruccion, bcp);
                 pcModificado = true;
                 break;
             case "JE":
-                if (cpu.isComparacionIgual()) {
+                if (bcp.getComparacionIgual()) {
                     ejecutarSalto(instruccion, bcp);
                     pcModificado = true;
                 }
                 break;
             case "JNE":
-                if (!cpu.isComparacionIgual()) {
+                if (!bcp.getComparacionIgual()) {
                     ejecutarSalto(instruccion, bcp);
                     pcModificado = true;
                 }
@@ -160,12 +160,10 @@ public class ManejadorInstrucciones {
         cpu.setRegistro(registro2, valorRegistro1);
     }
 
-    private void ejecutarCMP(Instruccion instruccion) {
-        String registro1 = instruccion.getOperando1();
-        String registro2 = instruccion.getOperando2();
-        int valorRegistro1 = cpu.getRegistro(registro1);
-        int valorRegistro2 = cpu.getRegistro(registro2);
-        cpu.setComparacionIgual(valorRegistro1 == valorRegistro2);
+    private void ejecutarCMP(Instruccion instruccion, BCP bcp) {
+        int valor1 = cpu.getRegistro(instruccion.getOperando1());
+        int valor2 = cpu.getRegistro(instruccion.getOperando2());
+        bcp.setComparacionIgual(valor1 == valor2);
     }
 
     private void ejecutarSalto(Instruccion instruccion, BCP bcp) {

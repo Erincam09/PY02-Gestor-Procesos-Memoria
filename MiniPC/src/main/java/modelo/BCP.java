@@ -37,6 +37,7 @@ public class BCP {
     private String ubicacion;
 
     private int direccionVirtual;
+    private boolean comparacionIgual;
 
     public BCP(int pid, String estado, int base, int alcance, int prioridad) {
         if (pid < 0) {
@@ -105,7 +106,9 @@ public class BCP {
     }
 
     public void agregarArchivoAbierto(String archivo) {
-        archivosAbiertos.add(archivo);
+        if (!estaArchivoAbierto(archivo)) {
+            archivosAbiertos.add(archivo);
+        }
     }
 
     public void eliminarArchivoAbierto(String archivo) {
@@ -114,6 +117,14 @@ public class BCP {
 
     public boolean estaArchivoAbierto(String archivo) {
         return archivosAbiertos.contains(archivo);
+    }
+
+    public void setComparacionIgual(boolean comp) {
+        comparacionIgual = comp;
+    }
+
+    public boolean getComparacionIgual() {
+        return comparacionIgual;
     }
 
     public int getPid() {
