@@ -7,8 +7,9 @@ import java.util.function.Function;
 public class FabricaAlgoritmos {
     private static final Map<String, Function<Map<String, Integer>, AlgoritmoPlanificacion>> creadores = new LinkedHashMap<>();
     static {
-        // Una línea por algoritmo. Cada llamada crea una instancia para un núcleo.
+        // Una línea por algoritmo
         creadores.put("FCFS", parametros -> new FCFS());
+        creadores.put("SPN", parametros -> new SPN());
     }
     public static AlgoritmoPlanificacion crear(String nombre, Map<String, Integer> parametros) {
         if (!creadores.containsKey(nombre)) {
