@@ -1,6 +1,7 @@
 package vista;
 
 import java.awt.*;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.*;
 import modelo.ConfiguracionSistema;
@@ -21,6 +22,7 @@ public class DialogoConfiguracion extends JDialog {
     private JSpinner spinnerMemoria;
     private JSpinner spinnerDisco;
     private JSpinner spinnerNucleos;
+    private JSpinner spinnerQuantum;
     private JComboBox<String> comboAlgoritmo;
 
     private JLabel lblKernel;
@@ -115,8 +117,25 @@ public class DialogoConfiguracion extends JDialog {
         TitledBorder borde = BorderFactory.createTitledBorder("Parámetros del algoritmo");
         borde.setTitleColor(TEXTO_SEC);
         parametros.setBorder(borde);
+        parametros.setLayout(new GridLayout(1, 2, 8, 0));
+
+        int quantum = 2;
+        if (configuracion.getParametrosAlgoritmo().containsKey("quantum")) {
+            quantum = configuracion.getParametrosAlgoritmo().get("quantum");
+        }
+        spinnerQuantum = crearSpinner(quantum, 1, Integer.MAX_VALUE, 1);
+        parametros.add(crearDato("Quantum (segundos)"));
+        parametros.add(spinnerQuantum);
         panel.add(parametros);
+
+        comboAlgoritmo.addActionListener(e -> actualizarParametros());
+        actualizarParametros();
         return panel;
+    }
+
+    private void actualizarParametros() {
+        String algoritmo = (String) comboAlgoritmo.getSelectedItem();
+        spinnerQuantum.setEnabled("RR".equals(algoritmo));
     }
 
     private JPanel crearPanelMemoria() {
@@ -310,6 +329,7 @@ public class DialogoConfiguracion extends JDialog {
     }
 
     private void restaurarPredeterminados() {
+        spinnerQuantum.setValue(2);
         spinnerMemoria.setValue(1024);
         spinnerNucleos.setValue(1);
         comboAlgoritmo.setSelectedItem("FCFS");
@@ -317,6 +337,12 @@ public class DialogoConfiguracion extends JDialog {
     }
 
     private void guardar() {
+        try {
+            spinnerQuantum.commitEdit();
+        } catch (java.text.ParseException error) {
+            JOptionPane.showMessageDialog(this, "El quantum debe ser un entero mayor que cero");
+            return;
+        }
         int memoria = (int) spinnerMemoria.getValue();
         int disco = (int) spinnerDisco.getValue();
 
@@ -324,6 +350,10 @@ public class DialogoConfiguracion extends JDialog {
         configuracion.setAlmacenamientoSecundario(disco);
         configuracion.setCantidadNucleos((int) spinnerNucleos.getValue());
         configuracion.setNombreAlgoritmo((String) comboAlgoritmo.getSelectedItem());
+
+        Map<String, Integer> parametros = configuracion.getParametrosAlgoritmo();
+        parametros.put("quantum", (int) spinnerQuantum.getValue());
+        configuracion.setParametrosAlgoritmo(parametros);
 
         guardado = true;
         dispose();

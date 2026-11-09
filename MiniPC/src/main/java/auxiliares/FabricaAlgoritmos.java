@@ -11,7 +11,16 @@ public class FabricaAlgoritmos {
         creadores.put("FCFS", parametros -> new FCFS());
         creadores.put("SPN", parametros -> new SPN());
         creadores.put("HRRN", parametros -> new HRRN());
+        creadores.put("RR", parametros -> crearRR(parametros));
     }
+    private static RR crearRR(Map<String, Integer> parametros) {
+        int quantum = 2;
+        if (parametros.containsKey("quantum")) {
+            quantum = parametros.get("quantum");
+        }
+        return new RR(quantum);
+    }
+
     public static AlgoritmoPlanificacion crear(String nombre, Map<String, Integer> parametros) {
         if (!creadores.containsKey(nombre)) {
             throw new IllegalArgumentException("Algoritmo desconocido: " + nombre);

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-/** Toda la ejecución usa segundos simulados y no depende de Swing. */
 public class Simulador {
     private final ConfiguracionSistema configuracion;
     private final Consumer<String> salida;
