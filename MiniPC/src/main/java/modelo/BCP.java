@@ -1,6 +1,5 @@
 package modelo;
 
-import java.lang.classfile.constantpool.StringEntry;
 import java.util.ArrayList;
 
 public class BCP {
@@ -22,6 +21,8 @@ public class BCP {
     private int cantActPila;
     //informacion contable
     private int cpu;
+    // Asignación estable; cpu indica solamente dónde está ejecutándose.
+    private int nucleoAsignado = -1;
     private String tiempoInicio;
     private long tiempoEmpleado;
     //Estado E/S
@@ -249,6 +250,17 @@ public class BCP {
 
     public void setPrioridad(int prioridad) {
         this.prioridad = prioridad;
+    }
+
+    public int getNucleoAsignado() {
+        return nucleoAsignado;
+    }
+
+    public void setNucleoAsignado(int nucleoAsignado) {
+        if (nucleoAsignado < -1 || nucleoAsignado >= ConfiguracionSistema.maxNucleos) {
+            throw new IllegalArgumentException("Identificador de núcleo inválido");
+        }
+        this.nucleoAsignado = nucleoAsignado;
     }
 
     public int getCpu() {

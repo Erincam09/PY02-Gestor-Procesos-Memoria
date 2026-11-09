@@ -4,17 +4,34 @@ import modelo.Proceso;
 import modelo.BCP;
 
 public class Despachador {
-    private CPU cpu;
+    private final CPU cpu;
+    private final int idNucleo;
     private Proceso procesoActual;
 
     public Despachador(CPU cpu) {
+        this(cpu, 0);
+    }
+
+    public Despachador(CPU cpu, int idNucleo) {
+        if (cpu == null || idNucleo < 0 || idNucleo >= modelo.ConfiguracionSistema.maxNucleos) {
+            throw new IllegalArgumentException("CPU o identificador de núcleo inválido");
+        }
         this.cpu = cpu;
+        this.idNucleo = idNucleo;
         this.procesoActual = null;
     }
 
     public void despachar(Proceso proceso) {
         if (proceso == null) {
             throw new IllegalArgumentException("El proceso no puede ser nulo");
+        }
+        if (hayProcesoActual()) {
+            throw new IllegalStateException("El núcleo ya tiene un proceso en ejecución");
+        }
+        if (proceso.getBcp().getCpu() != -1
+                || (proceso.getBcp().getNucleoAsignado() != -1
+                && proceso.getBcp().getNucleoAsignado() != idNucleo)) {
+            throw new IllegalStateException("El proceso pertenece a otro núcleo o ya está ejecutándose");
         }
         this.procesoActual = proceso;
         BCP bcp = proceso.getBcp();
@@ -28,7 +45,7 @@ public class Despachador {
         cpu.setDX(bcp.getDx());
         cpu.setIR(bcp.getIr());
         bcp.setEstado("EJECUCION");
-        bcp.setCpu(0);
+        bcp.setCpu(idNucleo);
     }
 
     public void guardarContexto() {

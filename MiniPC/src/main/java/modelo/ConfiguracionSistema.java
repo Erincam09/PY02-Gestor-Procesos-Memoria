@@ -1,17 +1,23 @@
 package modelo;
 
+import java.util.Map;
+import java.util.HashMap;
+
 public class ConfiguracionSistema {
 
     private int memoriaPrincipal;
     private int almacenamientoSecundario;
-    private int memoriaVirtual;
+    private String nombreAlgoritmo = "FCFS";
+    private Map<String, Integer> parametrosAlgoritmo = new HashMap<>();
+    public static final int PORCENTAJE_KERNEL = 75;
+    private int cantidadNucleos = 1;
 
     public static final int maxNucleos = 5;
     public static final int maxProcesosXNucleo = 5;
     public static final int maxProcesosTotal = maxNucleos * maxProcesosXNucleo;
 
     public ConfiguracionSistema() {
-        memoriaPrincipal = 256;
+        memoriaPrincipal = 1024;
         almacenamientoSecundario = 512;
     }
 
@@ -21,6 +27,40 @@ public class ConfiguracionSistema {
             throw new IllegalArgumentException("El almacenamiento secundario debe ser al menos 512");
         }
         this.almacenamientoSecundario = almacenamientoSecundario;
+    }
+
+    public ConfiguracionSistema(ConfiguracionSistema otra) {
+        this(otra.getMemoriaPrincipal(), otra.getAlmacenamientoSecundario());
+        cantidadNucleos = otra.getCantidadNucleos();
+        nombreAlgoritmo = otra.getNombreAlgoritmo();
+        parametrosAlgoritmo.putAll(otra.getParametrosAlgoritmo());
+    }
+
+    public String getNombreAlgoritmo() { return nombreAlgoritmo; }
+    public void setNombreAlgoritmo(String nombre) { nombreAlgoritmo = nombre; }
+    public Map<String, Integer> getParametrosAlgoritmo() {
+        return new HashMap<>(parametrosAlgoritmo);
+    }
+    public void setParametrosAlgoritmo(Map<String, Integer> parametros) {
+        parametrosAlgoritmo = new HashMap<>(parametros);
+    }
+    public static int calcularEspacioKernel(int tamanio) {
+        return tamanio * PORCENTAJE_KERNEL / 100;
+    }
+
+    public int getCantidadNucleos() {
+        return cantidadNucleos;
+    }
+
+    public void setCantidadNucleos(int cantidadNucleos) {
+        if (cantidadNucleos < 1 || cantidadNucleos > maxNucleos) {
+            throw new IllegalArgumentException("La cantidad de núcleos debe estar entre 1 y " + maxNucleos);
+        }
+        this.cantidadNucleos = cantidadNucleos;
+    }
+
+    public int getCapacidadProcesos() {
+        return cantidadNucleos * maxProcesosXNucleo;
     }
 
     public int getMemoriaPrincipal() {
@@ -47,7 +87,7 @@ public class ConfiguracionSistema {
     }
 
     public int getEspacioKernel() {
-        return (memoriaPrincipal * 25) / 100;
+        return calcularEspacioKernel(memoriaPrincipal);
     }
 
     public int getEspacioUsuario() {

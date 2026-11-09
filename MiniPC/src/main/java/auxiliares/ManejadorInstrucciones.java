@@ -56,13 +56,13 @@ public class ManejadorInstrucciones {
                 pcModificado = true;
                 break;
             case "JE":
-                if (bcp.getComparacionIgual()) {
+                if (cpu.isComparacionIgual()) {
                     ejecutarSalto(instruccion, bcp);
                     pcModificado = true;
                 }
                 break;
             case "JNE":
-                if (!bcp.getComparacionIgual()) {
+                if (!cpu.isComparacionIgual()) {
                     ejecutarSalto(instruccion, bcp);
                     pcModificado = true;
                 }
@@ -163,7 +163,7 @@ public class ManejadorInstrucciones {
     private void ejecutarCMP(Instruccion instruccion, BCP bcp) {
         int valor1 = cpu.getRegistro(instruccion.getOperando1());
         int valor2 = cpu.getRegistro(instruccion.getOperando2());
-        bcp.setComparacionIgual(valor1 == valor2);
+        cpu.setComparacionIgual(valor1 == valor2);
     }
 
     private void ejecutarSalto(Instruccion instruccion, BCP bcp) {
@@ -215,33 +215,4 @@ public class ManejadorInstrucciones {
         return operando.equals("AX") || operando.equals("AL") || operando.equals("BX") || operando.equals("CX") || operando.equals("DX");
     }
 
-    /* 
-    public int obtenerPeso(Instruccion instruccion) {
-        String operacion = instruccion.getTipoOp().toUpperCase();
-        if (operacion.equals("MOV") || operacion.equals("INC") || operacion.equals("DEC") || operacion.equals("SWAP") || operacion.equals("PUSH") || operacion.equals("POP")) {
-            return 1;
-        }
-        if (operacion.equals("LOAD") || operacion.equals("STORE") || operacion.equals("JMP") || operacion.equals("CMP") || operacion.equals("JE") || operacion.equals("JNE")) {
-            return 2;
-        }
-        if (operacion.equals("ADD") || operacion.equals("SUB") || operacion.equals("PARAM")) {
-            return 3;
-        }
-        if (operacion.equals("INT")) {
-            String interrupcion = instruccion.getOperando1().toUpperCase();
-            if (interrupcion.equals("20H") || interrupcion.equals("10H")) {
-                return 2;
-            }
-            if (interrupcion.equals("09H")) {
-                return 3;
-            }
-            if (interrupcion.equals("21H")) {
-                return 5;
-            }
-            throw new IllegalArgumentException("Interrupción inválida: " + interrupcion);
-        }
-        throw new IllegalArgumentException("Operación inválida: " + operacion);
-    }
-
-    */
 }
