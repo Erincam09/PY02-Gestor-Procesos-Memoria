@@ -10,6 +10,7 @@ public class FabricaAlgoritmos {
         // Una línea por algoritmo
         creadores.put("FCFS", parametros -> new FCFS());
         creadores.put("SPN", parametros -> new SPN());
+        creadores.put("HRRN", parametros -> new HRRN());
     }
     public static AlgoritmoPlanificacion crear(String nombre, Map<String, Integer> parametros) {
         if (!creadores.containsKey(nombre)) {
