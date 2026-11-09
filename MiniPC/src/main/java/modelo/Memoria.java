@@ -19,7 +19,7 @@ public class Memoria {
             throw new IllegalArgumentException("La memoria debe ser mínimo de 128");
         }
         this.memoriaP = new String[tamanio];
-        espacioKernel = tamanio/4;
+        espacioKernel = ConfiguracionSistema.calcularEspacioKernel(tamanio);
     }
     
     public void escribir(int espacio, String contenido) {

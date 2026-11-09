@@ -74,8 +74,10 @@ public class VentanaPrincipal extends JFrame {
     private JLabel lblEstadoSistema;
     private JLabel lblProcesoActual;
     private JLabel lblInstruccionActual;
-    private JLabel lblPeso;
-    private JLabel lblTiempoRestante;
+    private JButton btnLlegadas;
+    private JComboBox<String> comboNucleos;
+    private DefaultTableModel modeloListos;
+
     private JLabel lblTiempoCPU;
 
     // -------------------------------------------------
@@ -545,7 +547,8 @@ public class VentanaPrincipal extends JFrame {
                     "ID",
                     "Programa",
                     "Estado",
-                    "Instrucciones"
+                    "Instrucciones",
+                    "Llegada"
                 }
         );
 
@@ -560,7 +563,8 @@ public class VentanaPrincipal extends JFrame {
                     "Estado",
                     "Base",
                     "Alcance",
-                    "Prioridad"
+                    "Prioridad",
+                    "Núcleo"
                 }
         );
 
@@ -595,6 +599,13 @@ public class VentanaPrincipal extends JFrame {
 
         panel.setLayout(new BorderLayout());
 
+        JPanel selector = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        selector.setOpaque(false);
+        selector.add(etiquetaDato("Núcleo:"));
+        comboNucleos = new JComboBox<>();
+        selector.add(comboNucleos);
+        panel.add(selector, BorderLayout.NORTH);
+
         modeloBCP = modeloNoEditable(
                 new Object[]{
                     "Atributo",
@@ -616,10 +627,12 @@ public class VentanaPrincipal extends JFrame {
                 .getColumn(0)
                 .setMaxWidth(170);
 
-        panel.add(
-                crearScroll(tblBCP),
-                BorderLayout.CENTER
-        );
+        modeloListos = modeloNoEditable(new Object[]{"PID", "Programa", "Restante"});
+        JTabbedPane tabs = new JTabbedPane();
+        estilizarTabs(tabs);
+        tabs.addTab("BCP", crearScroll(tblBCP));
+        tabs.addTab("Listos", crearScroll(crearTabla(modeloListos)));
+        panel.add(tabs, BorderLayout.CENTER);
 
         return panel;
     }
@@ -831,7 +844,9 @@ public class VentanaPrincipal extends JFrame {
         botones.add(btnSiguiente);
         botones.add(btnEjecutarAutomatico);
         botones.add(btnReiniciar);
-        botones.add(btnEstadisticas);
+        btnEstadisticas.setVisible(false);
+        btnLlegadas = crearBotonSecundario("Tiempos de llegada");
+        botones.add(btnLlegadas);
 
         JPanel informacion = new JPanel(
                 new FlowLayout(
@@ -856,24 +871,14 @@ public class VentanaPrincipal extends JFrame {
                 "Instrucción: -"
         );
 
-        lblPeso = etiquetaDato(
-                "Peso: -"
-        );
-
-        lblTiempoRestante = etiquetaDato(
-                "Restante: -"
-        );
-
         lblTiempoCPU = etiquetaDato(
-                "CPU: 0 s"
+                "Reloj: 0 s"
         );
 
         informacion.add(lblEstadoSistema);
         informacion.add(separadorVertical());
         informacion.add(lblProcesoActual);
         informacion.add(lblInstruccionActual);
-        informacion.add(lblPeso);
-        informacion.add(lblTiempoRestante);
         informacion.add(lblTiempoCPU);
 
         barra.add(
@@ -1626,46 +1631,19 @@ public class VentanaPrincipal extends JFrame {
         );
     }
 
-    public void actualizarInfoEjecucion(
-            int pid,
-            String instruccion,
-            int peso,
-            int restante,
-            long tiempoCPU) {
+    public void actualizarInfoEjecucion(int pid, String instruccion, int reloj) {
+        lblProcesoActual.setText("PID: " + (pid < 0 ? "-" : pid));
+        lblInstruccionActual.setText("Instrucción: " + (instruccion == null ? "-" : instruccion));
+        lblTiempoCPU.setText("Reloj: " + reloj + " s");
+    }
 
-        lblProcesoActual.setText(
-                "PID: "
-                + (pid < 0
-                   ? "-"
-                   : pid)
-        );
-
-        lblInstruccionActual.setText(
-                "Instrucción: "
-                + (instruccion == null
-                   ? "-"
-                   : instruccion)
-        );
-
-        lblPeso.setText(
-                "Peso: "
-                + (peso < 0
-                   ? "-"
-                   : peso)
-        );
-
-        lblTiempoRestante.setText(
-                "Restante: "
-                + (restante < 0
-                   ? "-"
-                   : restante)
-        );
-
-        lblTiempoCPU.setText(
-                "CPU: "
-                + tiempoCPU
-                + " s"
-        );
+    public JButton getBtnLlegadas() { return btnLlegadas; }
+    public JComboBox<String> getComboNucleos() { return comboNucleos; }
+    public DefaultTableModel getModeloListos() { return modeloListos; }
+    public void configurarNucleos(int cantidad) {
+        comboNucleos.removeAllItems();
+        for (int i = 0; i < cantidad; i++) comboNucleos.addItem("Núcleo " + i);
+        comboNucleos.setSelectedIndex(0);
     }
 
     public void setEstadoSistema(

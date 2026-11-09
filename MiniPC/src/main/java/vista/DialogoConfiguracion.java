@@ -20,6 +20,8 @@ public class DialogoConfiguracion extends JDialog {
 
     private JSpinner spinnerMemoria;
     private JSpinner spinnerDisco;
+    private JSpinner spinnerNucleos;
+    private JComboBox<String> comboAlgoritmo;
 
     private JLabel lblKernel;
     private JLabel lblUsuario;
@@ -41,16 +43,13 @@ public class DialogoConfiguracion extends JDialog {
 
         super(ventanaPadre, "Configuración del sistema", true);
 
-        configuracion = new ConfiguracionSistema(
-                configuracionActual.getMemoriaPrincipal(),
-                configuracionActual.getAlmacenamientoSecundario()
-        );
+        configuracion = new ConfiguracionSistema(configuracionActual);
 
         guardado = false;
 
         crearInterfaz();
 
-        setSize(680, 570);
+        setSize(740, 760);
         setResizable(false);
         setLocationRelativeTo(ventanaPadre);
     }
@@ -67,6 +66,8 @@ public class DialogoConfiguracion extends JDialog {
         centro.setOpaque(false);
         centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
 
+        centro.add(crearPanelCPU());
+        centro.add(Box.createVerticalStrut(12));
         centro.add(crearPanelMemoria());
         centro.add(Box.createVerticalStrut(12));
         centro.add(crearPanelDisco());
@@ -96,6 +97,25 @@ public class DialogoConfiguracion extends JDialog {
         panel.add(Box.createVerticalStrut(3));
         panel.add(descripcion);
 
+        return panel;
+    }
+
+    private JPanel crearPanelCPU() {
+        JPanel panel = crearTarjeta();
+        panel.setLayout(new GridLayout(3, 2, 8, 8));
+        spinnerNucleos = crearSpinner(configuracion.getCantidadNucleos(), 1, 5, 1);
+        comboAlgoritmo = new JComboBox<>(auxiliares.FabricaAlgoritmos.getNombres());
+        comboAlgoritmo.setSelectedItem(configuracion.getNombreAlgoritmo());
+        panel.add(crearDato("Cantidad de núcleos"));
+        panel.add(spinnerNucleos);
+        panel.add(crearDato("Algoritmo"));
+        panel.add(comboAlgoritmo);
+        JPanel parametros = new JPanel();
+        parametros.setOpaque(false);
+        TitledBorder borde = BorderFactory.createTitledBorder("Parámetros del algoritmo");
+        borde.setTitleColor(TEXTO_SEC);
+        parametros.setBorder(borde);
+        panel.add(parametros);
         return panel;
     }
 
@@ -290,7 +310,9 @@ public class DialogoConfiguracion extends JDialog {
     }
 
     private void restaurarPredeterminados() {
-        spinnerMemoria.setValue(256);
+        spinnerMemoria.setValue(1024);
+        spinnerNucleos.setValue(1);
+        comboAlgoritmo.setSelectedItem("FCFS");
         spinnerDisco.setValue(512);
     }
 
@@ -298,7 +320,10 @@ public class DialogoConfiguracion extends JDialog {
         int memoria = (int) spinnerMemoria.getValue();
         int disco = (int) spinnerDisco.getValue();
 
-        configuracion = new ConfiguracionSistema(memoria, disco);
+        configuracion.setMemoriaPrincipal(memoria);
+        configuracion.setAlmacenamientoSecundario(disco);
+        configuracion.setCantidadNucleos((int) spinnerNucleos.getValue());
+        configuracion.setNombreAlgoritmo((String) comboAlgoritmo.getSelectedItem());
 
         guardado = true;
         dispose();
@@ -310,7 +335,7 @@ public class DialogoConfiguracion extends JDialog {
         }
 
         int memoria = (int) spinnerMemoria.getValue();
-        int kernel = (memoria * 25) / 100;
+        int kernel = ConfiguracionSistema.calcularEspacioKernel(memoria);
         int usuario = memoria - kernel;
 
         int disco = spinnerDisco == null
@@ -321,7 +346,7 @@ public class DialogoConfiguracion extends JDialog {
         int disponible = disco - virtual;
 
         if (lblKernel != null) {
-            lblKernel.setText("Kernel (25%): " + kernel);
+            lblKernel.setText("Kernel (" + ConfiguracionSistema.PORCENTAJE_KERNEL + "%): " + kernel);
         }
 
         if (lblUsuario != null) {
