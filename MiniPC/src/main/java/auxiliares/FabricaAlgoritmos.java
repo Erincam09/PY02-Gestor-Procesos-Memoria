@@ -13,6 +13,7 @@ public class FabricaAlgoritmos {
         creadores.put("HRRN", parametros -> new HRRN());
         creadores.put("RR", parametros -> crearRR(parametros));
         creadores.put("SRT", parametros -> new SRT());
+        creadores.put("Por Prioridad", parametros -> {boolean ap = parametros.getOrDefault("apropiativo", 0) == 1; return new PorPrioridad(ap); });
     }
     private static RR crearRR(Map<String, Integer> parametros) {
         int quantum = 2;

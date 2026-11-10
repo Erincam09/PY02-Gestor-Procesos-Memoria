@@ -23,6 +23,7 @@ public class DialogoConfiguracion extends JDialog {
     private JSpinner spinnerDisco;
     private JSpinner spinnerNucleos;
     private JSpinner spinnerQuantum;
+    private JCheckBox chkApropiativo;
     private JComboBox<String> comboAlgoritmo;
 
     private JLabel lblKernel;
@@ -108,24 +109,33 @@ public class DialogoConfiguracion extends JDialog {
         spinnerNucleos = crearSpinner(configuracion.getCantidadNucleos(), 1, 5, 1);
         comboAlgoritmo = new JComboBox<>(auxiliares.FabricaAlgoritmos.getNombres());
         comboAlgoritmo.setSelectedItem(configuracion.getNombreAlgoritmo());
+
         panel.add(crearDato("Cantidad de núcleos"));
         panel.add(spinnerNucleos);
         panel.add(crearDato("Algoritmo"));
         panel.add(comboAlgoritmo);
+
         JPanel parametros = new JPanel();
         parametros.setOpaque(false);
         TitledBorder borde = BorderFactory.createTitledBorder("Parámetros del algoritmo");
         borde.setTitleColor(TEXTO_SEC);
         parametros.setBorder(borde);
-        parametros.setLayout(new GridLayout(1, 2, 8, 0));
+        parametros.setLayout(new GridLayout(2, 2, 8, 4));
 
-        int quantum = 2;
-        if (configuracion.getParametrosAlgoritmo().containsKey("quantum")) {
-            quantum = configuracion.getParametrosAlgoritmo().get("quantum");
-        }
+        int quantum = configuracion.getParametrosAlgoritmo().getOrDefault("quantum", 2);
+        boolean apropiativo = configuracion.getParametrosAlgoritmo().getOrDefault("apropiativo", 0) == 1;
+
         spinnerQuantum = crearSpinner(quantum, 1, Integer.MAX_VALUE, 1);
-        parametros.add(crearDato("Quantum (segundos)"));
+        chkApropiativo = new JCheckBox("¿Es apropiativo?");
+        chkApropiativo.setOpaque(false);
+        chkApropiativo.setForeground(TEXTO);
+        chkApropiativo.setSelected(apropiativo);
+
+        parametros.add(crearDato("Quantum (s)"));
         parametros.add(spinnerQuantum);
+        parametros.add(crearDato("Modo Prioridad"));
+        parametros.add(chkApropiativo);
+
         panel.add(parametros);
 
         comboAlgoritmo.addActionListener(e -> actualizarParametros());
@@ -136,6 +146,7 @@ public class DialogoConfiguracion extends JDialog {
     private void actualizarParametros() {
         String algoritmo = (String) comboAlgoritmo.getSelectedItem();
         spinnerQuantum.setEnabled("RR".equals(algoritmo));
+        chkApropiativo.setEnabled("Por Prioridad".equals(algoritmo));
     }
 
     private JPanel crearPanelMemoria() {
@@ -353,6 +364,7 @@ public class DialogoConfiguracion extends JDialog {
 
         Map<String, Integer> parametros = configuracion.getParametrosAlgoritmo();
         parametros.put("quantum", (int) spinnerQuantum.getValue());
+        parametros.put("apropiativo", chkApropiativo.isSelected() ? 1 : 0);
         configuracion.setParametrosAlgoritmo(parametros);
 
         guardado = true;

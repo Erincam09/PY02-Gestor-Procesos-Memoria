@@ -80,7 +80,7 @@ public class MiniPCControlador {
     }
 
     private void configurarLlegadas() {
-        DialogoLlegadas dialogo = new DialogoLlegadas(vista, listaTrabajos.getTrabajos());
+        DialogoLlegadas dialogo = new DialogoLlegadas(vista, listaTrabajos.getTrabajos(), configuracion.getNombreAlgoritmo());
         dialogo.setVisible(true);
         if (dialogo.isGuardado()) {
             simulador.confirmarLlegadas();

@@ -11,41 +11,64 @@ public class DialogoLlegadas extends JDialog {
     private final DefaultTableModel modelo;
     private final JTable tabla;
     private boolean guardado;
+    private final boolean esPorPrioridad;
 
-    public DialogoLlegadas(JFrame padre, List<Trabajo> trabajos) {
-        super(padre, "Tiempos de llegada", true);
+    public DialogoLlegadas(JFrame padre, List<Trabajo> trabajos, String nombreAlgoritmo) {
+        super(padre, "Configuración de Trabajos", true);
         this.trabajos = trabajos;
-        modelo = new DefaultTableModel(new Object[]{"Programa", "Ráfaga", "Llegada"}, 0) {
-            public boolean isCellEditable(int fila, int columna) { return columna == 2; }
+        this.esPorPrioridad = "Por Prioridad".equalsIgnoreCase(nombreAlgoritmo);
+
+        Object[] columnas = esPorPrioridad ? 
+            new Object[]{"Programa", "Ráfaga", "Llegada", "Prioridad"} :
+            new Object[]{"Programa", "Ráfaga", "Llegada"};
+
+        modelo = new DefaultTableModel(columnas, 0) {
+            public boolean isCellEditable(int fila, int columna) { 
+                return esPorPrioridad ? (columna == 2 || columna == 3) : (columna == 2); 
+            }
         };
+
         for (Trabajo trabajo : trabajos) {
-            modelo.addRow(new Object[]{trabajo.getPrograma().getNombreArchivo(),
-                trabajo.getRafaga(), trabajo.getTiempoLlegada()});
+            if (esPorPrioridad) {
+                modelo.addRow(new Object[]{trabajo.getPrograma().getNombreArchivo(),
+                    trabajo.getRafaga(), trabajo.getTiempoLlegada(), trabajo.getPrioridad()});
+            } else {
+                modelo.addRow(new Object[]{trabajo.getPrograma().getNombreArchivo(),
+                    trabajo.getRafaga(), trabajo.getTiempoLlegada()});
+            }
         }
+        
         tabla = new JTable(modelo);
         setLayout(new BorderLayout(8, 8));
-        add(new JLabel("Confirme las llegadas; puede aceptar todos los valores en cero."), BorderLayout.NORTH);
+        add(new JLabel("  Configure los tiempos de llegada y prioridades de los programas."), BorderLayout.NORTH);
         add(new JScrollPane(tabla), BorderLayout.CENTER);
-        JButton guardar = new JButton("Confirmar llegadas");
+        
+        JButton guardar = new JButton("Confirmar valores");
         guardar.addActionListener(e -> guardar());
         add(guardar, BorderLayout.SOUTH);
-        setSize(620, 360);
+        
+        setSize(640, 360);
         setLocationRelativeTo(padre);
     }
 
     private void guardar() {
         if (tabla.isEditing() && !tabla.getCellEditor().stopCellEditing()) return;
-        int[] llegadas = new int[trabajos.size()];
         try {
             for (int i = 0; i < trabajos.size(); i++) {
-                llegadas[i] = Integer.parseInt(String.valueOf(modelo.getValueAt(i, 2)).trim());
-                if (llegadas[i] < 0) throw new NumberFormatException();
+                int llegada = Integer.parseInt(String.valueOf(modelo.getValueAt(i, 2)).trim());
+                if (llegada < 0) throw new NumberFormatException();
+                trabajos.get(i).setTiempoLlegada(llegada);
+
+                if (esPorPrioridad) {
+                    int prioridad = Integer.parseInt(String.valueOf(modelo.getValueAt(i, 3)).trim());
+                    if (prioridad < 0) throw new NumberFormatException();
+                    trabajos.get(i).setPrioridad(prioridad);
+                }
             }
         } catch (NumberFormatException error) {
-            JOptionPane.showMessageDialog(this, "Las llegadas deben ser enteros mayores o iguales a cero");
+            JOptionPane.showMessageDialog(this, "Los valores numéricos deben ser enteros mayores o iguales a cero.");
             return;
         }
-        for (int i = 0; i < trabajos.size(); i++) trabajos.get(i).setTiempoLlegada(llegadas[i]);
         guardado = true;
         dispose();
     }
