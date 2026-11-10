@@ -26,6 +26,10 @@ public class DialogoConfiguracion extends JDialog {
     private JCheckBox chkApropiativo;
     private JComboBox<String> comboAlgoritmo;
 
+    private JSpinner spinnerQuantumSRR;
+    private JSpinner spinnerASRR;
+    private JSpinner spinnerBSRR;
+
     private JLabel lblKernel;
     private JLabel lblUsuario;
     private JLabel lblVirtual;
@@ -63,8 +67,10 @@ public class DialogoConfiguracion extends JDialog {
         raiz.setBorder(new EmptyBorder(18, 20, 18, 20));
         setContentPane(raiz);
 
+        
         raiz.add(crearEncabezado(), BorderLayout.NORTH);
 
+        
         JPanel centro = new JPanel();
         centro.setOpaque(false);
         centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
@@ -77,7 +83,19 @@ public class DialogoConfiguracion extends JDialog {
         centro.add(Box.createVerticalStrut(12));
         centro.add(crearPanelResumen());
 
-        raiz.add(centro, BorderLayout.CENTER);
+        
+        JScrollPane scrollPane = new JScrollPane(centro);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(null); 
+        
+        
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+       
+        raiz.add(scrollPane, BorderLayout.CENTER);
+
+        
         raiz.add(crearPanelBotones(), BorderLayout.SOUTH);
     }
 
@@ -105,37 +123,65 @@ public class DialogoConfiguracion extends JDialog {
 
     private JPanel crearPanelCPU() {
         JPanel panel = crearTarjeta();
-        panel.setLayout(new GridLayout(3, 2, 8, 8));
+        
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
         spinnerNucleos = crearSpinner(configuracion.getCantidadNucleos(), 1, 5, 1);
         comboAlgoritmo = new JComboBox<>(auxiliares.FabricaAlgoritmos.getNombres());
         comboAlgoritmo.setSelectedItem(configuracion.getNombreAlgoritmo());
 
-        panel.add(crearDato("Cantidad de núcleos"));
-        panel.add(spinnerNucleos);
-        panel.add(crearDato("Algoritmo"));
-        panel.add(comboAlgoritmo);
+        // Fila 1: Cantidad de núcleos
+        JPanel filaNucleos = new JPanel(new BorderLayout(10, 0));
+        filaNucleos.setOpaque(false);
+        filaNucleos.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        filaNucleos.add(crearDato("Cantidad de núcleos"), BorderLayout.WEST);
+        filaNucleos.add(spinnerNucleos, BorderLayout.EAST);
 
+        // Fila 2: Algoritmo
+        JPanel filaAlgoritmo = new JPanel(new BorderLayout(10, 0));
+        filaAlgoritmo.setOpaque(false);
+        filaAlgoritmo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        filaAlgoritmo.add(crearDato("Algoritmo"), BorderLayout.WEST);
+        filaAlgoritmo.add(comboAlgoritmo, BorderLayout.EAST);
+
+        // Panel de Parámetros del Algoritmo
         JPanel parametros = new JPanel();
         parametros.setOpaque(false);
         TitledBorder borde = BorderFactory.createTitledBorder("Parámetros del algoritmo");
         borde.setTitleColor(TEXTO_SEC);
         parametros.setBorder(borde);
-        parametros.setLayout(new GridLayout(2, 2, 8, 4));
+        parametros.setLayout(new GridLayout(5, 2, 8, 6)); // 5 filas para Quantum, Apropiativo, Tasa A, Tasa B
 
         int quantum = configuracion.getParametrosAlgoritmo().getOrDefault("quantum", 2);
         boolean apropiativo = configuracion.getParametrosAlgoritmo().getOrDefault("apropiativo", 0) == 1;
+        int tasaA = configuracion.getParametrosAlgoritmo().getOrDefault("a", 2);
+        int tasaB = configuracion.getParametrosAlgoritmo().getOrDefault("b", 1);
 
         spinnerQuantum = crearSpinner(quantum, 1, Integer.MAX_VALUE, 1);
+        
         chkApropiativo = new JCheckBox("¿Es apropiativo?");
         chkApropiativo.setOpaque(false);
         chkApropiativo.setForeground(TEXTO);
         chkApropiativo.setSelected(apropiativo);
 
+        
+        spinnerASRR = crearSpinner(tasaA, 1, 100, 1);
+        spinnerBSRR = crearSpinner(tasaB, 1, 100, 1);
+
         parametros.add(crearDato("Quantum (s)"));
         parametros.add(spinnerQuantum);
         parametros.add(crearDato("Modo Prioridad"));
         parametros.add(chkApropiativo);
+        parametros.add(crearDato("Tasa A (SelfishRR)"));
+        parametros.add(spinnerASRR);
+        parametros.add(crearDato("Tasa B (SelfishRR)"));
+        parametros.add(spinnerBSRR);
 
+        
+        panel.add(filaNucleos);
+        panel.add(Box.createVerticalStrut(8));
+        panel.add(filaAlgoritmo);
+        panel.add(Box.createVerticalStrut(10));
         panel.add(parametros);
 
         comboAlgoritmo.addActionListener(e -> actualizarParametros());
@@ -145,8 +191,15 @@ public class DialogoConfiguracion extends JDialog {
 
     private void actualizarParametros() {
         String algoritmo = (String) comboAlgoritmo.getSelectedItem();
-        spinnerQuantum.setEnabled("RR".equals(algoritmo));
-        chkApropiativo.setEnabled("Por Prioridad".equals(algoritmo));
+        
+        boolean esRR = "RR".equals(algoritmo);
+        boolean esSRR = "SelfishRR".equals(algoritmo);
+        boolean esPrioridad = "Por Prioridad".equals(algoritmo);
+
+        spinnerQuantum.setEnabled(esRR || esSRR);
+        chkApropiativo.setEnabled(esPrioridad);
+        spinnerASRR.setEnabled(esSRR);
+        spinnerBSRR.setEnabled(esSRR);
     }
 
     private JPanel crearPanelMemoria() {
@@ -362,9 +415,18 @@ public class DialogoConfiguracion extends JDialog {
         configuracion.setCantidadNucleos((int) spinnerNucleos.getValue());
         configuracion.setNombreAlgoritmo((String) comboAlgoritmo.getSelectedItem());
 
+        int a = (int) spinnerASRR.getValue();
+        int b = (int) spinnerBSRR.getValue();
+        if (b > a) {
+            JOptionPane.showMessageDialog(this, "La tasa 'b' debe ser menor o igual que la tasa 'a' (b <= a).");
+            return;
+        }
+
         Map<String, Integer> parametros = configuracion.getParametrosAlgoritmo();
         parametros.put("quantum", (int) spinnerQuantum.getValue());
         parametros.put("apropiativo", chkApropiativo.isSelected() ? 1 : 0);
+        parametros.put("a", a);
+        parametros.put("b", b);
         configuracion.setParametrosAlgoritmo(parametros);
 
         guardado = true;

@@ -14,6 +14,12 @@ public class FabricaAlgoritmos {
         creadores.put("RR", parametros -> crearRR(parametros));
         creadores.put("SRT", parametros -> new SRT());
         creadores.put("Por Prioridad", parametros -> {boolean ap = parametros.getOrDefault("apropiativo", 0) == 1; return new PorPrioridad(ap); });
+        creadores.put("SelfishRR", parametros -> {
+            int quantum = parametros.getOrDefault("quantum", 2);
+            int a = parametros.getOrDefault("a", 2);
+            int b = parametros.getOrDefault("b", 1);
+            return new SelfishRR(quantum, a, b);
+        });
     }
     private static RR crearRR(Map<String, Integer> parametros) {
         int quantum = 2;
