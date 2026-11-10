@@ -12,6 +12,7 @@ public class FabricaAlgoritmos {
         creadores.put("SPN", parametros -> new SPN());
         creadores.put("HRRN", parametros -> new HRRN());
         creadores.put("RR", parametros -> crearRR(parametros));
+        creadores.put("SRT", parametros -> new SRT());
     }
     private static RR crearRR(Map<String, Integer> parametros) {
         int quantum = 2;
