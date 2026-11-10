@@ -12,6 +12,7 @@ public class Simulador {
     private int siguientePid;
     private boolean llegadasConfirmadas;
     private boolean iniciado;
+    private boolean fetchInicialHecho;
     private ArrayList<Nucleo> nucleos;
     private ListaTrabajos listaTrabajos;
     private ListaProcesos listaProcesos;
@@ -35,6 +36,7 @@ public class Simulador {
         siguientePid = 1;
         iniciado = false;
         llegadasConfirmadas = false;
+        fetchInicialHecho = false;
         memoria = new Memoria(configuracion.getMemoriaPrincipal());
         disco = new AlmacenamientoSecundario(configuracion.getAlmacenamientoSecundario(), configuracion.getMemoriaVirtual());
         memoriaVirtual = new MemoriaVirtual(disco);
@@ -69,25 +71,48 @@ public class Simulador {
         sincronizarTrabajos();
     }
 
-    public void confirmarLlegadas() { llegadasConfirmadas = true; }
+    public void confirmarLlegadas() { 
+        llegadasConfirmadas = true; 
+    }
+
+
+    public void inicializarVisualizacion() {
+        if (!llegadasConfirmadas || fetchInicialHecho) return;
+        iniciado = true;
+        fetchInicialHecho = true;
+        prepararInstante();
+    }
+
+    private void prepararInstante() {
+        admitirTrabajos();
+        for (Nucleo nucleo : nucleos) {
+            nucleo.prepararSegundo(reloj);
+        }
+        for (Proceso proceso : listaProcesos.getProcesos()) {
+            manejoBCP.sincronizarBCP(memoria, proceso.getBcp());
+        }
+        sincronizarTrabajos();
+    }
 
     public void tick() {
         if (!llegadasConfirmadas) throw new IllegalStateException("Confirme los tiempos de llegada");
         if (haTerminado() || listaTrabajos.estaVacia()) return;
-        iniciado = true;
-        admitirTrabajos();
+        inicializarVisualizacion();
         ArrayList<ResultadoSegundo> terminados = new ArrayList<>();
         for (Nucleo nucleo : nucleos) {
             ResultadoSegundo resultado = nucleo.ejecutarSegundo(reloj);
             if (resultado.isTerminado()) terminados.add(resultado);
         }
-        // Ningún núcleo ejecuta procesos promovidos durante este mismo segundo.
         for (ResultadoSegundo resultado : terminados) finalizarProceso(resultado);
-        for (Proceso proceso : listaProcesos.getProcesos()) {
-            manejoBCP.sincronizarBCP(memoria, proceso.getBcp());
-        }
         reloj++;
-        sincronizarTrabajos();
+        if (haTerminado()) {
+            for (Proceso proceso : listaProcesos.getProcesos()) {
+                manejoBCP.sincronizarBCP(memoria, proceso.getBcp());
+            }
+            sincronizarTrabajos();
+        } else {
+            prepararInstante();
+        }
     }
 
     private void admitirTrabajos() {

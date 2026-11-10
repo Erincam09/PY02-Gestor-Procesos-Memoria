@@ -61,37 +61,52 @@ public class Nucleo {
         algoritmo.alLlegar(proceso, reloj);
     }
 
+   
+    public void prepararSegundo(int reloj) {
+        Proceso actual = despachador.getProcesoActual();
+        // Copia para que el algoritmo no modifique la cola del núcleo.
+        Proceso elegido = algoritmo.elegir(new ArrayList<>(listos), actual, reloj);
+        if (elegido == null && actual != null) {
+            throw new IllegalStateException("El algoritmo no puede omitir al proceso activo");
+        }
+        if (elegido != actual) {
+            if (!listos.contains(elegido)) {
+                throw new IllegalStateException("Proceso elegido fuera de listos");
+            }
+            if (actual != null) {
+                despachador.retirarProceso("PREPARADO");
+                actual.setQuantumUsado(0);
+                listos.add(actual);
+            }
+            listos.remove(elegido);
+            despachador.despachar(elegido);
+            elegido.setQuantumUsado(0);
+            if (elegido.getTiempoInicio() == -1) {
+                elegido.setTiempoInicio(reloj);
+                elegido.getBcp().setTiempoInicio(String.valueOf(reloj));
+            }
+        }
+        actual = despachador.getProcesoActual();
+        direccionInstruccionActual = -1;
+        if (actual == null) {
+            return;
+        }
+        int indice = cpu.getPC() - actual.getBcp().getBase();
+        if (indice >= 0 && indice < actual.getPrograma().getCantInstrucciones()) {
+            direccionInstruccionActual = cpu.getPC();
+            cpu.setIR(actual.getPrograma().getInstrucciones().get(indice).getEntradaTexto());
+            despachador.guardarContexto();
+        }
+    }
+
+    
     public ResultadoSegundo ejecutarSegundo(int reloj) {
         Proceso actual = despachador.getProcesoActual();
+        if (actual == null) {
+            tiempoOcioso++;
+            return new ResultadoSegundo(null, false, null);
+        }
         try {
-            // Copia para que el algoritmo no modifique la cola del núcleo.
-            Proceso elegido = algoritmo.elegir(new ArrayList<>(listos), actual, reloj);
-            if (elegido == null && actual != null) {
-                throw new IllegalStateException("El algoritmo no puede omitir al proceso activo");
-            }
-            if (elegido != actual) {
-                if (!listos.contains(elegido)) {
-                    throw new IllegalStateException("Proceso elegido fuera de listos");
-                }
-                if (actual != null) {
-                    despachador.retirarProceso("PREPARADO");
-                    actual.setQuantumUsado(0);
-                    listos.add(actual);
-                }
-                listos.remove(elegido);
-                despachador.despachar(elegido);
-                elegido.setQuantumUsado(0);
-                if (elegido.getTiempoInicio() == -1) {
-                    elegido.setTiempoInicio(reloj);
-                    elegido.getBcp().setTiempoInicio(String.valueOf(reloj));
-                }
-            }
-            actual = despachador.getProcesoActual();
-            if (actual == null) {
-                tiempoOcioso++;
-                direccionInstruccionActual = -1;
-                return new ResultadoSegundo(null, false, null);
-            }
             int indice = cpu.getPC() - actual.getBcp().getBase();
             if (indice < 0) {
                 throw new IllegalStateException("PC fuera del proceso");
@@ -99,14 +114,14 @@ public class Nucleo {
             if (indice >= actual.getPrograma().getCantInstrucciones()) {
                 return terminar(actual, reloj, null);
             }
-            direccionInstruccionActual = cpu.getPC();
+            
             Instruccion instruccion = actual.getPrograma().getInstrucciones().get(indice);
-            cpu.setIR(instruccion.getEntradaTexto());
             if (instruccion.getTipoOp().equals("INT")) {
                 ejecutarInterrupcion(actual, instruccion);
             } else {
                 instrucciones.ejecutar(instruccion, actual.getBcp());
             }
+            
             actual.registrarSegundo();
             despachador.guardarContexto();
             algoritmo.alTerminarSegundo(actual, reloj + 1);
@@ -128,7 +143,7 @@ public class Nucleo {
         proceso.setTiempoFin(tiempo);
         procesos.remove(proceso);
         listos.remove(proceso);
-        // Se conserva nucleoAsignado como parte del historial del proceso.
+        
         return new ResultadoSegundo(proceso, true, error);
     }
 

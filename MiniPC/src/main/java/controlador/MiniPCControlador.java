@@ -84,6 +84,7 @@ public class MiniPCControlador {
         dialogo.setVisible(true);
         if (dialogo.isGuardado()) {
             simulador.confirmarLlegadas();
+            simulador.inicializarVisualizacion();
             vista.setEstadoSistema("Listo para ejecutar");
         }
         actualizarVistaCompleta();
