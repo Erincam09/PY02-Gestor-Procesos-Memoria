@@ -195,8 +195,9 @@ public class DialogoConfiguracion extends JDialog {
         boolean esRR = "RR".equals(algoritmo);
         boolean esSRR = "SelfishRR".equals(algoritmo);
         boolean esPrioridad = "Por Prioridad".equals(algoritmo);
+        boolean esLottery = "Lottery".equals(algoritmo);
 
-        spinnerQuantum.setEnabled(esRR || esSRR);
+        spinnerQuantum.setEnabled(esRR || esSRR || esLottery);
         chkApropiativo.setEnabled(esPrioridad);
         spinnerASRR.setEnabled(esSRR);
         spinnerBSRR.setEnabled(esSRR);

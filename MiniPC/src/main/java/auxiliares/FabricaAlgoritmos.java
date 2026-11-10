@@ -20,6 +20,10 @@ public class FabricaAlgoritmos {
             int b = parametros.getOrDefault("b", 1);
             return new SelfishRR(quantum, a, b);
         });
+        creadores.put("Lottery", parametros -> {
+            int quantum = parametros.getOrDefault("quantum", 2);
+            return new Lottery(quantum);
+        });
     }
     private static RR crearRR(Map<String, Integer> parametros) {
         int quantum = 2;

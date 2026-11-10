@@ -12,19 +12,26 @@ public class DialogoLlegadas extends JDialog {
     private final JTable tabla;
     private boolean guardado;
     private final boolean esPorPrioridad;
+    private final boolean esLottery; 
 
     public DialogoLlegadas(JFrame padre, List<Trabajo> trabajos, String nombreAlgoritmo) {
         super(padre, "Configuración de Trabajos", true);
         this.trabajos = trabajos;
         this.esPorPrioridad = "Por Prioridad".equalsIgnoreCase(nombreAlgoritmo);
+        this.esLottery = "Lottery".equalsIgnoreCase(nombreAlgoritmo);
 
-        Object[] columnas = esPorPrioridad ? 
-            new Object[]{"Programa", "Ráfaga", "Llegada", "Prioridad"} :
-            new Object[]{"Programa", "Ráfaga", "Llegada"};
+        Object[] columnas = null;
+        if (esPorPrioridad) {
+            columnas = new Object[]{"Programa", "Ráfaga", "Llegada", "Prioridad"};
+        } else if (esLottery) {
+            columnas = new Object[]{"Programa", "Ráfaga", "Llegada", "Tickets"};
+        } else {
+            columnas = new Object[]{"Programa", "Ráfaga", "Llegada"};
+        }
 
         modelo = new DefaultTableModel(columnas, 0) {
             public boolean isCellEditable(int fila, int columna) { 
-                return esPorPrioridad ? (columna == 2 || columna == 3) : (columna == 2); 
+                return esPorPrioridad ? (columna == 2 || columna == 3) : (esLottery ? (columna == 2 || columna == 3) : (columna == 2));
             }
         };
 
@@ -32,6 +39,9 @@ public class DialogoLlegadas extends JDialog {
             if (esPorPrioridad) {
                 modelo.addRow(new Object[]{trabajo.getPrograma().getNombreArchivo(),
                     trabajo.getRafaga(), trabajo.getTiempoLlegada(), trabajo.getPrioridad()});
+            } else if (esLottery) {
+                modelo.addRow(new Object[]{trabajo.getPrograma().getNombreArchivo(),
+                    trabajo.getRafaga(), trabajo.getTiempoLlegada(), trabajo.getTickets()});
             } else {
                 modelo.addRow(new Object[]{trabajo.getPrograma().getNombreArchivo(),
                     trabajo.getRafaga(), trabajo.getTiempoLlegada()});
@@ -63,6 +73,10 @@ public class DialogoLlegadas extends JDialog {
                     int prioridad = Integer.parseInt(String.valueOf(modelo.getValueAt(i, 3)).trim());
                     if (prioridad < 0) throw new NumberFormatException();
                     trabajos.get(i).setPrioridad(prioridad);
+                } else if (esLottery) {
+                    int tickets = Integer.parseInt(String.valueOf(modelo.getValueAt(i, 3)).trim());
+                    if (tickets < 0) throw new NumberFormatException();
+                    trabajos.get(i).setTickets(tickets);
                 }
             }
         } catch (NumberFormatException error) {
