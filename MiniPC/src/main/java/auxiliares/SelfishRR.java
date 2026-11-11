@@ -36,14 +36,12 @@ public class SelfishRR implements AlgoritmoPlanificacion {
         }
 
         // Si el proceso actual no ha terminado su ráfaga, le queda tiempo de CPU y no ha terminado su quantum, debe seguir.
-        if (actual != null && actual.getQuantumUsado() < quantum) {
-
-            return actual; 
-        }
-
-        // Si el quantum se agotó o el proceso terminó, reiniciamos el contador para la próxima vez
         if (actual != null) {
-            actual.setQuantumUsado(0); 
+            if (actual.getQuantumUsado() < quantum) {
+                return actual;
+            } else {
+                actual.setQuantumUsado(0);
+            }
         }
 
         if (listos.isEmpty()) {
@@ -87,7 +85,7 @@ public class SelfishRR implements AlgoritmoPlanificacion {
         if (procesosAceptados.isEmpty()) {
             procesosAceptados.add(proceso.getPid());
         }
-        // Si ya hay procesos en el sistema, entra estrictamente como nuevo.
+        // Si ya hay procesos en el sistema, entra como nuevo.
     }
 
     public void alTerminarSegundo(Proceso proceso, int tiempo) {

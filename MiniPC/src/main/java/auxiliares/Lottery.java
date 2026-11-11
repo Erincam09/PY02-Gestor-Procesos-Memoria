@@ -1,79 +1,72 @@
 package auxiliares;
 
 import java.util.List;
+import java.util.ArrayList;
 import modelo.Proceso;
 
 public class Lottery implements AlgoritmoPlanificacion {
 
-    private int quantum;
-    private int tiempoEnQuantum; // Controla cuánto tiempo lleva el proceso actual
+    private final int quantum;
 
     public Lottery(int quantum) {
+        if (quantum <= 0) {
+            throw new IllegalArgumentException("Quantum debe ser mayor que cero");
+        }
         this.quantum = quantum;
-        this.tiempoEnQuantum = 0;
     }
 
+    
     public String getNombre() {
         return "Lottery";
     }
 
+    
     public Proceso elegir(List<Proceso> listos, Proceso actual, int tiempo) {
+        
         if (listos.isEmpty() && actual == null) {
             return null;
         }
 
-       
+        
         if (actual != null) {
-            
-            if (actual.getRestante() == 0) { 
-                tiempoEnQuantum = 0; 
-            } 
-            
-            else if (tiempoEnQuantum < quantum) {
-                return actual; 
-            } 
-            
-            else if (listos.isEmpty()) {
-                tiempoEnQuantum = 0; 
+            if (actual.getQuantumUsado() < quantum) {
+                
                 return actual;
+            } else {
+                
+                actual.setQuantumUsado(0);
             }
-           
-            else {
-                tiempoEnQuantum = 0; 
-            }
+        }
+
+        
+        List<Proceso> competidores = new ArrayList<>(listos);
+        if (actual != null) {
+            competidores.add(actual);
         }
 
        
-        if (listos.isEmpty()) {
-            return null;
+        int totalTickets = 0;
+        for (Proceso p : competidores) {
+            totalTickets += p.getTickets();
         }
 
-        int total = 0;
-        for (Proceso p : listos) {
-            total += p.getTickets();
-        }
+        int ticketGanador = (int) (Math.random() * totalTickets);
+        int ticketAcumulado = 0;
 
-        int ticketGanador = (int) (Math.random() * total);
-        int ticketActual = 0;
-
-        for (Proceso p : listos) {
-            ticketActual += p.getTickets();
-            if (ticketActual > ticketGanador) {
-                tiempoEnQuantum = 0; 
+        for (Proceso p : competidores) {
+            ticketAcumulado += p.getTickets();
+            if (ticketGanador < ticketAcumulado) {
                 return p;
             }
         }
 
-        return null;
+        
+        return competidores.get(0);
     }
+
+  
+    public void alLlegar(Proceso proceso, int tiempo) { }
 
     
-    public void alTerminarSegundo(Proceso proceso, int tiempo) {
-        if (proceso != null) {
-            tiempoEnQuantum++;
-        }
-    }
-
-    public void alLlegar(Proceso proceso, int tiempo) {
-    }
+    public void alTerminarSegundo(Proceso proceso, int tiempo) { }
 }

@@ -24,6 +24,10 @@ public class FabricaAlgoritmos {
             int quantum = parametros.getOrDefault("quantum", 2);
             return new Lottery(quantum);
         });
+        creadores.put("Guaranteed Scheduling", parametros -> {
+            int quantum = parametros.getOrDefault("quantum", 2);
+            return new GuaranteedScheduling(quantum);
+        });
     }
     private static RR crearRR(Map<String, Integer> parametros) {
         int quantum = 2;
