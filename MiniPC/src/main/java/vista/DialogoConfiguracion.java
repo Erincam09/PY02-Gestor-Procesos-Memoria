@@ -1,7 +1,11 @@
 package vista;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.swing.*;
 import javax.swing.border.*;
 import modelo.ConfiguracionSistema;
@@ -25,6 +29,10 @@ public class DialogoConfiguracion extends JDialog {
     private JSpinner spinnerQuantum;
     private JCheckBox chkApropiativo;
     private JComboBox<String> comboAlgoritmo;
+
+    private JComboBox<String> comboEstrategiaMemoria;
+    private JSpinner spinnerParticiones;
+    private JTextField txtTamanios;
 
     private JSpinner spinnerQuantumSRR;
     private JSpinner spinnerASRR;
@@ -78,6 +86,8 @@ public class DialogoConfiguracion extends JDialog {
         centro.add(crearPanelCPU());
         centro.add(Box.createVerticalStrut(12));
         centro.add(crearPanelMemoria());
+        centro.add(Box.createVerticalStrut(12));
+        centro.add(crearPanelEstrategiaMemoria());
         centro.add(Box.createVerticalStrut(12));
         centro.add(crearPanelDisco());
         centro.add(Box.createVerticalStrut(12));
@@ -270,6 +280,65 @@ public class DialogoConfiguracion extends JDialog {
         return panel;
     }
 
+    private JPanel crearPanelEstrategiaMemoria() {
+        JPanel panel = crearTarjeta();
+        panel.setLayout(new BorderLayout(10, 8));
+
+        panel.add(
+                crearTitulo(
+                        "Estrategia de asignación de memoria",
+                        "Método usado para ubicar los programas en memoria."
+                ),
+                BorderLayout.NORTH
+        );
+
+        comboEstrategiaMemoria = new JComboBox<>(auxiliares.FabricaEstrategiasMemoria.getNombres());
+        comboEstrategiaMemoria.setSelectedItem(configuracion.getNombreEstrategiaMemoria());
+
+        Map<String, Integer> parametros = configuracion.getParametrosEstrategiaMemoria();
+        spinnerParticiones = crearSpinner(parametros.getOrDefault("particiones", 4), 1, 256, 1);
+
+        txtTamanios = new JTextField(configuracion.getTamaniosParticiones().stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(",")));
+        txtTamanios.setBackground(PANEL_2);
+        txtTamanios.setForeground(TEXTO);
+        txtTamanios.setCaretColor(TEXTO);
+
+        JPanel filas = new JPanel(new GridLayout(3, 2, 8, 6));
+        filas.setOpaque(false);
+        filas.add(crearDato("Estrategia"));
+        filas.add(comboEstrategiaMemoria);
+        filas.add(crearDato("Particiones (fijo igual)"));
+        filas.add(spinnerParticiones);
+        filas.add(crearDato("Tamaños (fijo diferente, separados por coma)"));
+        filas.add(txtTamanios);
+
+        panel.add(filas, BorderLayout.CENTER);
+
+        comboEstrategiaMemoria.addActionListener(e -> actualizarParametrosMemoria());
+        actualizarParametrosMemoria();
+        return panel;
+    }
+
+    private void actualizarParametrosMemoria() {
+        String estrategia = (String) comboEstrategiaMemoria.getSelectedItem();
+        spinnerParticiones.setEnabled("Partición Fija Igual".equals(estrategia));
+        txtTamanios.setEnabled("Partición Fija Diferente".equals(estrategia));
+    }
+
+    private static List<Integer> leerTamanios(String texto) {
+        List<Integer> tamanios = new ArrayList<>();
+        for (String parte : texto.split(",")) {
+            int valor = Integer.parseInt(parte.trim());
+            if (valor <= 0) {
+                throw new IllegalArgumentException("Tamaño no positivo");
+            }
+            tamanios.add(valor);
+        }
+        return tamanios;
+    }
+
     private JPanel crearPanelDisco() {
         JPanel panel = crearTarjeta();
         panel.setLayout(new BorderLayout(10, 8));
@@ -400,6 +469,9 @@ public class DialogoConfiguracion extends JDialog {
         spinnerNucleos.setValue(1);
         comboAlgoritmo.setSelectedItem("FCFS");
         spinnerDisco.setValue(512);
+        comboEstrategiaMemoria.setSelectedItem("Dinámica First Fit");
+        spinnerParticiones.setValue(4);
+        txtTamanios.setText("64,64,128");
     }
 
     private void guardar() {
@@ -412,10 +484,38 @@ public class DialogoConfiguracion extends JDialog {
         int memoria = (int) spinnerMemoria.getValue();
         int disco = (int) spinnerDisco.getValue();
 
+        String estrategiaMemoria = (String) comboEstrategiaMemoria.getSelectedItem();
+        int espacioUsuario = memoria - ConfiguracionSistema.calcularEspacioKernel(memoria);
+        List<Integer> tamanios = configuracion.getTamaniosParticiones();
+        if ("Partición Fija Diferente".equals(estrategiaMemoria)) {
+            try {
+                tamanios = leerTamanios(txtTamanios.getText());
+            } catch (IllegalArgumentException error) {
+                JOptionPane.showMessageDialog(this, "Los tamaños de partición deben ser enteros positivos separados por comas.");
+                return;
+            }
+            int suma = tamanios.stream().mapToInt(Integer::intValue).sum();
+            if (suma > espacioUsuario) {
+                JOptionPane.showMessageDialog(this, "La suma de las particiones (" + suma
+                        + ") supera el espacio de usuario (" + espacioUsuario + ").");
+                return;
+            }
+        } else if ("Partición Fija Igual".equals(estrategiaMemoria)
+                && (int) spinnerParticiones.getValue() > espacioUsuario) {
+            JOptionPane.showMessageDialog(this, "El número de particiones supera el espacio de usuario (" + espacioUsuario + ").");
+            return;
+        }
+
         configuracion.setMemoriaPrincipal(memoria);
         configuracion.setAlmacenamientoSecundario(disco);
         configuracion.setCantidadNucleos((int) spinnerNucleos.getValue());
         configuracion.setNombreAlgoritmo((String) comboAlgoritmo.getSelectedItem());
+
+        configuracion.setNombreEstrategiaMemoria(estrategiaMemoria);
+        Map<String, Integer> parametrosMemoria = new HashMap<>();
+        parametrosMemoria.put("particiones", (int) spinnerParticiones.getValue());
+        configuracion.setParametrosEstrategiaMemoria(parametrosMemoria);
+        configuracion.setTamaniosParticiones(tamanios);
 
         int a = (int) spinnerASRR.getValue();
         int b = (int) spinnerBSRR.getValue();

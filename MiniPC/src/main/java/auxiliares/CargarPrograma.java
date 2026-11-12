@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package auxiliares;
+import modelo.AsignacionMemoria;
 import modelo.Instruccion;
 import modelo.Programa;
 import modelo.Memoria;
@@ -12,26 +13,26 @@ import modelo.Memoria;
  * @author erinc
  */
 public class CargarPrograma {
-    private AdministradorMemoria adminMemoria;
+    private final EstrategiaMemoria estrategia;
 
-    public CargarPrograma(AdministradorMemoria adminMemoria) {
-        this.adminMemoria = adminMemoria;
+    public CargarPrograma(EstrategiaMemoria estrategia) {
+        this.estrategia = estrategia;
     }
 
-    public int cargar(Programa programa, Memoria memoria) {
+    public AsignacionMemoria cargar(Programa programa, Memoria memoria) {
         if (programa == null || memoria == null) {
             throw new IllegalArgumentException("El programa y la memoria son obligatorios.");
         }
         int cantidadInstrucciones = programa.getCantInstrucciones();
-        int base = adminMemoria.buscarEspacio(memoria, cantidadInstrucciones);
-        if (base == -1) {
-            return -1;
+        AsignacionMemoria asignacion = estrategia.asignar(memoria, cantidadInstrucciones);
+        if (asignacion == null) {
+            return null;
         }
-        int posicion = base;
+        int indice = 0;
         for (Instruccion instruccion : programa.getInstrucciones()) {
-            memoria.escribir(posicion, instruccion.getEntradaTexto());
-            posicion++;
+            memoria.escribir(asignacion.getPosiciones().get(indice), instruccion.getEntradaTexto());
+            indice++;
         }
-        return base;
+        return asignacion;
     }
 }

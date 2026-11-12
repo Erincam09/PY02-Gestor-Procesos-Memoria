@@ -1,5 +1,7 @@
 package modelo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -9,6 +11,9 @@ public class ConfiguracionSistema {
     private int almacenamientoSecundario;
     private String nombreAlgoritmo = "FCFS";
     private Map<String, Integer> parametrosAlgoritmo = new HashMap<>();
+    private String nombreEstrategiaMemoria = "Dinámica First Fit";
+    private Map<String, Integer> parametrosEstrategiaMemoria = new HashMap<>(Map.of("particiones", 4));
+    private List<Integer> tamaniosParticiones = new ArrayList<>(List.of(64, 64, 128));
     public static final int PORCENTAJE_KERNEL = 75;
     private int cantidadNucleos = 1;
 
@@ -34,6 +39,9 @@ public class ConfiguracionSistema {
         cantidadNucleos = otra.getCantidadNucleos();
         nombreAlgoritmo = otra.getNombreAlgoritmo();
         parametrosAlgoritmo.putAll(otra.getParametrosAlgoritmo());
+        nombreEstrategiaMemoria = otra.getNombreEstrategiaMemoria();
+        parametrosEstrategiaMemoria.putAll(otra.getParametrosEstrategiaMemoria());
+        tamaniosParticiones = otra.getTamaniosParticiones();
     }
 
     public String getNombreAlgoritmo() { return nombreAlgoritmo; }
@@ -43,6 +51,20 @@ public class ConfiguracionSistema {
     }
     public void setParametrosAlgoritmo(Map<String, Integer> parametros) {
         parametrosAlgoritmo = new HashMap<>(parametros);
+    }
+    public String getNombreEstrategiaMemoria() { return nombreEstrategiaMemoria; }
+    public void setNombreEstrategiaMemoria(String nombre) { nombreEstrategiaMemoria = nombre; }
+    public Map<String, Integer> getParametrosEstrategiaMemoria() {
+        return new HashMap<>(parametrosEstrategiaMemoria);
+    }
+    public void setParametrosEstrategiaMemoria(Map<String, Integer> parametros) {
+        parametrosEstrategiaMemoria = new HashMap<>(parametros);
+    }
+    public List<Integer> getTamaniosParticiones() {
+        return new ArrayList<>(tamaniosParticiones);
+    }
+    public void setTamaniosParticiones(List<Integer> tamanios) {
+        tamaniosParticiones = new ArrayList<>(tamanios);
     }
     public static int calcularEspacioKernel(int tamanio) {
         return tamanio * PORCENTAJE_KERNEL / 100;

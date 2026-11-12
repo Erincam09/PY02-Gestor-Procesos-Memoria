@@ -12,6 +12,7 @@ public class Proceso {
     private int quantumUsado;
     private int nivelCola;
     private int tickets = 1;
+    private AsignacionMemoria asignacionMemoria;
 
     public Proceso(Programa programa, BCP bcp) {
         this.programa = programa;
@@ -38,6 +39,8 @@ public class Proceso {
     public void setNivelCola(int valor) { nivelCola = valor; }
     public int getPrioridad() { return bcp.getPrioridad(); }
     public void setPrioridad(int valor) { bcp.setPrioridad(valor); }
+    public AsignacionMemoria getAsignacionMemoria() { return asignacionMemoria; }
+    public void setAsignacionMemoria(AsignacionMemoria valor) { asignacionMemoria = valor; }
     public int getTickets() { return tickets; }
     public void setTickets(int valor) { tickets = valor; }
     public int getEspera(int reloj) {

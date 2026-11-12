@@ -24,6 +24,7 @@ public class Simulador {
     private GestorAdmisionTrabajos admision;
     private final AsignadorNucleos asignador = new AsignadorNucleos();
     private CargarPrograma cargador;
+    private EstrategiaMemoria estrategiaMemoria;
 
     public Simulador(ConfiguracionSistema configuracion, Consumer<String> salida) {
         this.configuracion = new ConfiguracionSistema(configuracion);
@@ -45,7 +46,9 @@ public class Simulador {
         manejoBCP = new ManejoBCP();
         almacenamiento = new ManejadorAlmacenamiento(disco);
         admision = new GestorAdmisionTrabajos(listaTrabajos);
-        cargador = new CargarPrograma(new AdministradorMemoria());
+        estrategiaMemoria = FabricaEstrategiasMemoria.crear(configuracion.getNombreEstrategiaMemoria(),
+                configuracion.getParametrosEstrategiaMemoria(), configuracion.getTamaniosParticiones());
+        cargador = new CargarPrograma(estrategiaMemoria);
         nucleos = new ArrayList<>();
         for (int i = 0; i < configuracion.getCantidadNucleos(); i++) {
             AlgoritmoPlanificacion algoritmo = FabricaAlgoritmos.crear(
@@ -55,7 +58,9 @@ public class Simulador {
     }
 
     public void cargarPrograma(Programa programa) {
-        if (iniciado) throw new IllegalStateException("Reinicie antes de cargar más programas");
+        if (iniciado) {
+            throw new IllegalStateException("Reinicie antes de cargar más programas");
+        }
         // Una posición del kernel por trabajo, sin ocupar el área reservada para BCP.
         if (listaTrabajos.cantidadTrabajos() + 1 + manejoBCP.getTamanioBCP() > memoria.getEspacioKernel()) {
             throw new IllegalStateException("No hay espacio en el kernel para otro trabajo");
@@ -77,7 +82,9 @@ public class Simulador {
 
 
     public void inicializarVisualizacion() {
-        if (!llegadasConfirmadas || fetchInicialHecho) return;
+        if (!llegadasConfirmadas || fetchInicialHecho) {
+            return;
+        }
         iniciado = true;
         fetchInicialHecho = true;
         prepararInstante();
@@ -95,15 +102,23 @@ public class Simulador {
     }
 
     public void tick() {
-        if (!llegadasConfirmadas) throw new IllegalStateException("Confirme los tiempos de llegada");
-        if (haTerminado() || listaTrabajos.estaVacia()) return;
+        if (!llegadasConfirmadas) {
+            throw new IllegalStateException("Confirme los tiempos de llegada");
+        }
+        if (haTerminado() || listaTrabajos.estaVacia()) {
+            return;
+        }
         inicializarVisualizacion();
         ArrayList<ResultadoSegundo> terminados = new ArrayList<>();
         for (Nucleo nucleo : nucleos) {
             ResultadoSegundo resultado = nucleo.ejecutarSegundo(reloj);
-            if (resultado.isTerminado()) terminados.add(resultado);
+            if (resultado.isTerminado()) {
+                terminados.add(resultado);
+            }
         }
-        for (ResultadoSegundo resultado : terminados) finalizarProceso(resultado);
+        for (ResultadoSegundo resultado : terminados) {
+            finalizarProceso(resultado);
+        }
         reloj++;
         if (haTerminado()) {
             for (Proceso proceso : listaProcesos.getProcesos()) {
@@ -118,19 +133,24 @@ public class Simulador {
     private void admitirTrabajos() {
         for (Trabajo trabajo : admision.obtenerPendientes(reloj)) {
             Nucleo nucleo = asignador.elegirNucleo(nucleos);
-            if (nucleo == null || !manejoBCP.hayEspacioParaBCP(memoria)) continue;
+            if (nucleo == null || !manejoBCP.hayEspacioParaBCP(memoria)) {
+                continue;
+            }
             Programa programa = trabajo.getPrograma();
             int alcance = programa.getCantInstrucciones();
-            if (alcance > memoria.getTamanio() - memoria.getEspacioKernel()) {
+            if (!estrategiaMemoria.puedeAlojar(memoria, alcance)) {
                 trabajo.setEstado("RECHAZADO");
                 salida.accept("Programa rechazado por tamaño: " + programa.getNombreArchivo() + "\n");
                 continue;
             }
-            int base = cargador.cargar(programa, memoria);
+            AsignacionMemoria asignacion = cargador.cargar(programa, memoria);
+            int base = asignacion == null ? -1 : asignacion.getBase();
             int virtual = -1;
             if (base == -1) {
                 virtual = memoriaVirtual.cargarPrograma(programa, siguientePid);
-                if (virtual == -1) continue;
+                if (virtual == -1) {
+                    continue;
+                }
             }
             CPU inicial = new CPU();
             inicial.setPC(base);
@@ -139,6 +159,7 @@ public class Simulador {
             bcp.setDireccionVirtual(virtual);
             bcp.setEstado(base == -1 ? "EN ESPERA" : "PREPARADO");
             Proceso proceso = new Proceso(programa, bcp);
+            proceso.setAsignacionMemoria(asignacion);
             proceso.setLlegada(trabajo.getTiempoLlegada());
             proceso.setTickets(trabajo.getTickets());
             nucleo.agregarProceso(proceso, reloj);
@@ -152,8 +173,12 @@ public class Simulador {
     private void finalizarProceso(ResultadoSegundo resultado) {
         Proceso proceso = resultado.getProceso();
         BCP bcp = proceso.getBcp();
-        if (bcp.getBase() >= memoria.getEspacioKernel()) memoria.liberarProceso(bcp.getBase(), bcp.getAlcance());
-        if (bcp.getDireccionVirtual() != -1) memoriaVirtual.liberarRango(bcp.getDireccionVirtual(), bcp.getAlcance());
+        if (proceso.getAsignacionMemoria() != null) {
+            estrategiaMemoria.liberar(memoria, proceso.getAsignacionMemoria());
+        }
+        if (bcp.getDireccionVirtual() != -1) {
+            memoriaVirtual.liberarRango(bcp.getDireccionVirtual(), bcp.getAlcance());
+        }
         Trabajo trabajo = buscarTrabajo(proceso.getPrograma());
         trabajo.setEstado(resultado.getError() == null ? "FINALIZADO" : "ERROR");
         if (resultado.getError() != null) {
@@ -167,13 +192,18 @@ public class Simulador {
     private void intentarPasarVirtualARAM() {
         for (Proceso proceso : listaProcesos.getProcesos()) {
             BCP bcp = proceso.getBcp();
-            if (!bcp.getEstado().equals("EN ESPERA") || bcp.getDireccionVirtual() == -1) continue;
-            int base = cargador.cargar(proceso.getPrograma(), memoria);
-            if (base == -1) continue;
+            if (!bcp.getEstado().equals("EN ESPERA") || bcp.getDireccionVirtual() == -1) {
+                continue;
+            }  
+            AsignacionMemoria asignacion = cargador.cargar(proceso.getPrograma(), memoria);
+            if (asignacion == null) {
+                continue;
+            }
             memoriaVirtual.liberarRango(bcp.getDireccionVirtual(), bcp.getAlcance());
+            proceso.setAsignacionMemoria(asignacion);
             bcp.setDireccionVirtual(-1);
-            bcp.setBase(base);
-            bcp.setPc(base);
+            bcp.setBase(asignacion.getBase());
+            bcp.setPc(asignacion.getBase());
             bcp.setEstado("PREPARADO");
             bcp.setUbicacionPrograma("RAM");
             nucleos.get(bcp.getNucleoAsignado()).agregarListo(proceso, reloj + 1);
@@ -202,7 +232,9 @@ public class Simulador {
         if (listaTrabajos.estaVacia()) return false;
         for (Trabajo trabajo : listaTrabajos.getTrabajos()) {
             String estado = trabajo.getEstado();
-            if (!estado.equals("FINALIZADO") && !estado.equals("RECHAZADO") && !estado.equals("ERROR")) return false;
+            if (!estado.equals("FINALIZADO") && !estado.equals("RECHAZADO") && !estado.equals("ERROR")) {
+                return false;
+            }
         }
         return true;
     }
