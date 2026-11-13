@@ -7,6 +7,14 @@ public interface EstrategiaMemoria {
     String getNombre();
 
     
+    default void iniciar(Memoria memoria) {
+    }
+
+    
+    default int getParticion(int posicion) {
+        return -1;
+    }
+    
     AsignacionMemoria asignar(Memoria memoria, int cantidad);
 
     

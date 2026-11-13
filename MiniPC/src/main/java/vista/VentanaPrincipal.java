@@ -45,6 +45,14 @@ public class VentanaPrincipal extends JFrame {
     // -------------------- TABLAS --------------------
 
     private JTable tblMemoria;
+    private int[] particionesMemoria = new int[0];
+   
+    private static final Color[] COLORES_PARTICION = {
+        new Color(85, 60, 125),
+        new Color(125, 85, 40),
+        new Color(125, 55, 70),
+        new Color(95, 100, 45)
+    };
     private JTable tblDisco;
     private JTable tblMemoriaVirtual;
     private JTable tblTrabajos;
@@ -267,6 +275,28 @@ public class VentanaPrincipal extends JFrame {
         );
 
         tblMemoria = crearTabla(modeloMemoria);
+
+        DefaultTableCellRenderer rendererMemoria = new DefaultTableCellRenderer() {
+            
+            public Component getTableCellRendererComponent(JTable tabla, Object valor,
+                    boolean seleccionada, boolean foco, int fila, int columna) {
+                super.getTableCellRendererComponent(tabla, valor, seleccionada, foco, fila, columna);
+                int posicion = tabla.convertRowIndexToModel(fila);
+                if (seleccionada) {
+                    return this;
+                }
+                
+                if (posicion < particionesMemoria.length && particionesMemoria[posicion] >= 0) {
+                    setBackground(COLORES_PARTICION[particionesMemoria[posicion] % COLORES_PARTICION.length]);
+                } else {
+                    setBackground(tabla.getBackground());
+                }
+                setForeground(TEXTO);
+                return this;
+            }
+        };
+        rendererMemoria.setBorder(new EmptyBorder(0, 6, 0, 6));
+        tblMemoria.setDefaultRenderer(Object.class, rendererMemoria);
 
         tblMemoria
                 .getColumnModel()
@@ -1178,7 +1208,7 @@ public class VentanaPrincipal extends JFrame {
                 0
         ) {
 
-            @Override
+            
             public boolean isCellEditable(
                     int row,
                     int column) {
@@ -1204,7 +1234,7 @@ public class VentanaPrincipal extends JFrame {
         tabs.setUI(
                 new BasicTabbedPaneUI() {
 
-                    @Override
+                    
                     protected void installDefaults() {
 
                         super.installDefaults();
@@ -1234,7 +1264,7 @@ public class VentanaPrincipal extends JFrame {
                                 );
                     }
 
-                    @Override
+                    
                     protected void paintTabBackground(
                             Graphics g,
                             int tabPlacement,
@@ -1268,7 +1298,7 @@ public class VentanaPrincipal extends JFrame {
                         );
                     }
 
-                    @Override
+                    
                     protected void paintText(
                             Graphics g,
                             int tabPlacement,
@@ -1304,7 +1334,7 @@ public class VentanaPrincipal extends JFrame {
                         );
                     }
 
-                    @Override
+                    
                     protected void paintFocusIndicator(
                             Graphics g,
                             int tabPlacement,
@@ -1714,6 +1744,10 @@ public class VentanaPrincipal extends JFrame {
 
     public JTable getTblMemoria() {
         return tblMemoria;
+    }
+
+    public void setParticionesMemoria(int[] particiones) {
+        particionesMemoria = particiones;
     }
 
     public JTable getTblDisco() {

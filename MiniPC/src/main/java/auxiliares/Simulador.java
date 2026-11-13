@@ -49,6 +49,7 @@ public class Simulador {
         estrategiaMemoria = FabricaEstrategiasMemoria.crear(configuracion.getNombreEstrategiaMemoria(),
                 configuracion.getParametrosEstrategiaMemoria(), configuracion.getTamaniosParticiones());
         cargador = new CargarPrograma(estrategiaMemoria);
+        estrategiaMemoria.iniciar(memoria);
         nucleos = new ArrayList<>();
         for (int i = 0; i < configuracion.getCantidadNucleos(); i++) {
             AlgoritmoPlanificacion algoritmo = FabricaAlgoritmos.crear(
@@ -245,6 +246,7 @@ public class Simulador {
     public ListaTrabajos getListaTrabajos() { return listaTrabajos; }
     public ListaProcesos getListaProcesos() { return listaProcesos; }
     public Memoria getMemoria() { return memoria; }
+    public EstrategiaMemoria getEstrategiaMemoria() { return estrategiaMemoria; }
     public MemoriaVirtual getMemoriaVirtual() { return memoriaVirtual; }
     public AlmacenamientoSecundario getDisco() { return disco; }
     public ManejoBCP getManejoBCP() { return manejoBCP; }

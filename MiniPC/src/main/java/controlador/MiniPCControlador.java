@@ -158,6 +158,13 @@ public class MiniPCControlador {
         DefaultTableModel modelo = vista.getModeloMemoria();
         modelo.setRowCount(0);
 
+        int[] particiones = new int[memoria.getTamanio()];
+        EstrategiaMemoria estrategia = simulador.getEstrategiaMemoria();
+        for (int i = 0; i < particiones.length; i++) {
+            particiones[i] = estrategia.getParticion(i);
+        }
+        vista.setParticionesMemoria(particiones);
+
         for (int i = 0; i < memoria.getTamanio(); i++) {
             String contenido = memoria.leer(i);
 
