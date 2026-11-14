@@ -7,12 +7,18 @@ public class AsignacionMemoria {
     private final List<Integer> posiciones;
     
     private final int reservado;
+    private final TablaPaginas tablaPaginas;
 
     public AsignacionMemoria(List<Integer> posiciones) {
         this(posiciones, posiciones.size());
     }
 
     public AsignacionMemoria(List<Integer> posiciones, int reservado) {
+        this(posiciones, reservado, null);
+    }
+
+    public AsignacionMemoria(List<Integer> posiciones, int reservado, TablaPaginas tablaPaginas) {
+        this.tablaPaginas = tablaPaginas;
         this.posiciones = new ArrayList<>(posiciones);
         this.reservado = reservado;
     }
@@ -27,6 +33,19 @@ public class AsignacionMemoria {
             posiciones.add(base + i);
         }
         return new AsignacionMemoria(posiciones, reservado);
+    }
+
+   
+    public TablaPaginas getTablaPaginas() {
+        return tablaPaginas;
+    }
+
+    
+    public int traducir(int direccionLogica) {
+        if (tablaPaginas != null) {
+            return tablaPaginas.traducir(direccionLogica);
+        }
+        return posiciones.get(direccionLogica);
     }
 
     public int getReservado() {

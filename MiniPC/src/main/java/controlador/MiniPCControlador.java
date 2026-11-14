@@ -296,6 +296,9 @@ public class MiniPCControlador {
         agregarDatoBCP(modelo, "Base", bcp.getBase());
         agregarDatoBCP(modelo, "Alcance", bcp.getAlcance());
         agregarDatoBCP(modelo, "Prioridad", bcp.getPrioridad());
+        if (proceso.getAsignacionMemoria() != null && proceso.getAsignacionMemoria().getTablaPaginas() != null) {
+            agregarDatoBCP(modelo, "Tabla de páginas", proceso.getAsignacionMemoria().getTablaPaginas());
+        }
     }
 
     private void agregarDatoBCP(DefaultTableModel modelo, String atributo, Object valor) {

@@ -9,7 +9,7 @@ public class FabricaEstrategiasMemoria {
     private static final Map<String, BiFunction<Map<String, Integer>, List<Integer>, EstrategiaMemoria>> creadores = new LinkedHashMap<>();
     static {
         // Una línea por estrategia
-        creadores.put("Paginación", (parametros, tamanios) -> new Paginacion());
+        creadores.put("Paginación", (parametros, tamanios) -> new Paginacion(parametros.getOrDefault("pagina", 8)));
         creadores.put("Partición Fija Igual", (parametros, tamanios) -> new ParticionFijaIgual(parametros.getOrDefault("particiones", 4)));
         creadores.put("Partición Fija Diferente", (parametros, tamanios) -> new ParticionFijaDiferente(tamanios));
         creadores.put("Dinámica First Fit", (parametros, tamanios) -> new DinamicaFirstFit());

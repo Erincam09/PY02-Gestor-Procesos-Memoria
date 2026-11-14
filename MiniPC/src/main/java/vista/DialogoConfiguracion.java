@@ -32,6 +32,7 @@ public class DialogoConfiguracion extends JDialog {
 
     private JComboBox<String> comboEstrategiaMemoria;
     private JSpinner spinnerParticiones;
+    private JSpinner spinnerPagina;
     private JTextField txtTamanios;
 
     private JSpinner spinnerQuantumSRR;
@@ -297,6 +298,7 @@ public class DialogoConfiguracion extends JDialog {
 
         Map<String, Integer> parametros = configuracion.getParametrosEstrategiaMemoria();
         spinnerParticiones = crearSpinner(parametros.getOrDefault("particiones", 4), 1, 256, 1);
+        spinnerPagina = crearSpinner(parametros.getOrDefault("pagina", 8), 1, 256, 1);
 
         txtTamanios = new JTextField(configuracion.getTamaniosParticiones().stream()
                 .map(String::valueOf)
@@ -305,10 +307,12 @@ public class DialogoConfiguracion extends JDialog {
         txtTamanios.setForeground(TEXTO);
         txtTamanios.setCaretColor(TEXTO);
 
-        JPanel filas = new JPanel(new GridLayout(3, 2, 8, 6));
+        JPanel filas = new JPanel(new GridLayout(4, 2, 8, 6));
         filas.setOpaque(false);
         filas.add(crearDato("Estrategia"));
         filas.add(comboEstrategiaMemoria);
+        filas.add(crearDato("Tamaño de página (paginación)"));
+        filas.add(spinnerPagina);
         filas.add(crearDato("Particiones (fijo igual)"));
         filas.add(spinnerParticiones);
         filas.add(crearDato("Tamaños (fijo diferente, separados por coma)"));
@@ -324,6 +328,7 @@ public class DialogoConfiguracion extends JDialog {
     private void actualizarParametrosMemoria() {
         String estrategia = (String) comboEstrategiaMemoria.getSelectedItem();
         spinnerParticiones.setEnabled("Partición Fija Igual".equals(estrategia));
+        spinnerPagina.setEnabled("Paginación".equals(estrategia));
         txtTamanios.setEnabled("Partición Fija Diferente".equals(estrategia));
     }
 
@@ -471,6 +476,7 @@ public class DialogoConfiguracion extends JDialog {
         spinnerDisco.setValue(512);
         comboEstrategiaMemoria.setSelectedItem("Dinámica First Fit");
         spinnerParticiones.setValue(4);
+        spinnerPagina.setValue(8);
         txtTamanios.setText("64,64,128");
     }
 
@@ -504,6 +510,10 @@ public class DialogoConfiguracion extends JDialog {
                 && (int) spinnerParticiones.getValue() > espacioUsuario) {
             JOptionPane.showMessageDialog(this, "El número de particiones supera el espacio de usuario (" + espacioUsuario + ").");
             return;
+        } else if ("Paginación".equals(estrategiaMemoria)
+                && (int) spinnerPagina.getValue() > espacioUsuario) {
+            JOptionPane.showMessageDialog(this, "El tamaño de página supera el espacio de usuario (" + espacioUsuario + ").");
+            return;
         }
 
         configuracion.setMemoriaPrincipal(memoria);
@@ -514,6 +524,7 @@ public class DialogoConfiguracion extends JDialog {
         configuracion.setNombreEstrategiaMemoria(estrategiaMemoria);
         Map<String, Integer> parametrosMemoria = new HashMap<>();
         parametrosMemoria.put("particiones", (int) spinnerParticiones.getValue());
+        parametrosMemoria.put("pagina", (int) spinnerPagina.getValue());
         configuracion.setParametrosEstrategiaMemoria(parametrosMemoria);
         configuracion.setTamaniosParticiones(tamanios);
 

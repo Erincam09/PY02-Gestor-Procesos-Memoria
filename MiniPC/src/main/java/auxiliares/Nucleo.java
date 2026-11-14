@@ -93,7 +93,7 @@ public class Nucleo {
         }
         int indice = cpu.getPC() - actual.getBcp().getBase();
         if (indice >= 0 && indice < actual.getPrograma().getCantInstrucciones()) {
-            direccionInstruccionActual = cpu.getPC();
+            direccionInstruccionActual = direccionFisica(actual, indice);
             cpu.setIR(actual.getPrograma().getInstrucciones().get(indice).getEntradaTexto());
             despachador.guardarContexto();
         }
@@ -216,6 +216,15 @@ public class Nucleo {
         cpu.setPC(cpu.getPC() + 1);
     }
 
+
+    
+    private int direccionFisica(Proceso proceso, int indice) {
+        AsignacionMemoria asignacion = proceso.getAsignacionMemoria();
+        if (asignacion == null) {
+            return cpu.getPC();
+        }
+        return asignacion.traducir(indice);
+    }
 
     public int getId() { 
         return id; 
