@@ -11,7 +11,7 @@ public class FabricaAlgoritmos {
         creadores.put("FCFS", parametros -> new FCFS());
         creadores.put("SPN", parametros -> new SPN());
         creadores.put("HRRN", parametros -> new HRRN());
-        creadores.put("RR", parametros -> crearRR(parametros));
+        creadores.put("RR", parametros ->  new RR(parametros.getOrDefault("quantum", 2)));
         creadores.put("SRT", parametros -> new SRT());
         creadores.put("Por Prioridad", parametros -> {boolean ap = parametros.getOrDefault("apropiativo", 0) == 1; return new PorPrioridad(ap); });
         creadores.put("SelfishRR", parametros -> {
@@ -28,13 +28,11 @@ public class FabricaAlgoritmos {
             int quantum = parametros.getOrDefault("quantum", 2);
             return new GuaranteedScheduling(quantum);
         });
-    }
-    private static RR crearRR(Map<String, Integer> parametros) {
-        int quantum = 2;
-        if (parametros.containsKey("quantum")) {
-            quantum = parametros.get("quantum");
-        }
-        return new RR(quantum);
+        creadores.put("Multilevel Feedback Queue", parametros -> {
+            int quantum = parametros.getOrDefault("quantum", 2);
+            return new MultilevelFQueue(quantum);
+        });
+
     }
 
     public static AlgoritmoPlanificacion crear(String nombre, Map<String, Integer> parametros) {

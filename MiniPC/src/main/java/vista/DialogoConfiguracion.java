@@ -208,8 +208,9 @@ public class DialogoConfiguracion extends JDialog {
         boolean esPrioridad = "Por Prioridad".equals(algoritmo);
         boolean esLottery = "Lottery".equals(algoritmo);
         boolean esGuaranteed = "Guaranteed Scheduling".equals(algoritmo);
+        boolean esMultilevel = "Multilevel Feedback Queue".equals(algoritmo);
 
-        spinnerQuantum.setEnabled(esRR || esSRR || esLottery || esGuaranteed);
+        spinnerQuantum.setEnabled(esRR || esSRR || esLottery || esGuaranteed || esMultilevel);
         chkApropiativo.setEnabled(esPrioridad);
         spinnerASRR.setEnabled(esSRR);
         spinnerBSRR.setEnabled(esSRR);
@@ -487,6 +488,14 @@ public class DialogoConfiguracion extends JDialog {
             JOptionPane.showMessageDialog(this, "El quantum debe ser un entero mayor que cero");
             return;
         }
+        String algoritmo = (String) comboAlgoritmo.getSelectedItem();
+        int quantum = (int) spinnerQuantum.getValue();
+
+        if ("Multilevel Feedback Queue".equals(algoritmo) && quantum > Integer.MAX_VALUE / 4) {
+            JOptionPane.showMessageDialog(this, "El quantum máximo para Multilevel es " + Integer.MAX_VALUE / 4);
+            return;
+        }
+
         int memoria = (int) spinnerMemoria.getValue();
         int disco = (int) spinnerDisco.getValue();
 

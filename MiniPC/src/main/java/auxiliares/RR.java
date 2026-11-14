@@ -12,7 +12,7 @@ public class RR implements AlgoritmoPlanificacion {
         this.quantum = quantum;
     }
     public String getNombre() { 
-        return "RR"; 
+        return "Round Robin"; 
     }
     public Proceso elegir(List<Proceso> listos, Proceso actual, int tiempo) {
         if (actual != null) {
