@@ -89,7 +89,7 @@ public class ParticionFijaIgual implements EstrategiaMemoria {
         }
         for (int i = 0; i < particiones; i++) {
             if (inicios[i] == asignacion.getBase()) {
-                ocupada[1] = false;
+                ocupada[i] = false;
                 break;
             }
         }

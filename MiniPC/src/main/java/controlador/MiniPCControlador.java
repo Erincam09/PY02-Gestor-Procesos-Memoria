@@ -157,25 +157,36 @@ public class MiniPCControlador {
     private void actualizarMemoria() {
         DefaultTableModel modelo = vista.getModeloMemoria();
         modelo.setRowCount(0);
-
         int[] particiones = new int[memoria.getTamanio()];
         EstrategiaMemoria estrategia = simulador.getEstrategiaMemoria();
+        boolean esDinamica = estrategia.getNombre().startsWith("Dinámica");
+
         for (int i = 0; i < particiones.length; i++) {
             particiones[i] = estrategia.getParticion(i);
+        }
+        if (esDinamica) {
+            for (Proceso proceso : listaProcesos.getProcesos()) {
+                AsignacionMemoria asignacion = proceso.getAsignacionMemoria();
+                if (asignacion != null) {
+                    for (int posicion : asignacion.getPosiciones()) {
+                        particiones[posicion] = proceso.getPid();
+                    }
+                }
+            }
         }
         vista.setParticionesMemoria(particiones);
 
         for (int i = 0; i < memoria.getTamanio(); i++) {
             String contenido = memoria.leer(i);
-
             if (contenido == null) {
                 if (i < memoria.getEspacioKernel()) {
                     contenido = "Libre / Kernel";
                 } else {
                     contenido = "Libre";
                 }
+            } else if (esDinamica && particiones[i] >= 0) {
+                contenido = "PID " + particiones[i] + " | " + contenido;
             }
-
             modelo.addRow(new Object[]{i, contenido});
         }
     }
