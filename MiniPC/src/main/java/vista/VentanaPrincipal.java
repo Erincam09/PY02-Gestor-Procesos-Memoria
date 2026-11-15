@@ -1083,9 +1083,11 @@ public class VentanaPrincipal extends JFrame {
                     boolean seleccionada, boolean foco, int fila, int columna) {
                 super.getTableCellRendererComponent(tabla, valor, seleccionada, foco, fila, columna);
                 String nombre = tabla.getColumnName(columna);
-                boolean posicion = "Posición".equals(nombre)
-                        || "V.Pos".equals(nombre) || "Disco".equals(nombre);
-                setHorizontalAlignment(posicion ? CENTER : LEFT);
+                boolean centrar = "Posición".equals(nombre)
+                        || "V.Pos".equals(nombre) || "Disco".equals(nombre)
+                        || "ID".equals(nombre) || "PID".equals(nombre)
+                        || "Atributo".equals(nombre);
+                setHorizontalAlignment(centrar ? CENTER : LEFT);
                 return this;
             }
         };
