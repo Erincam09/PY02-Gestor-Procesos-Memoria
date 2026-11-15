@@ -1,5 +1,7 @@
-package auxiliares;
+package auxiliares.algoritmosPlanificacion;
 import java.util.List;
+
+import auxiliares.AlgoritmoPlanificacion;
 import modelo.Proceso;
 
 public class FCFS implements AlgoritmoPlanificacion {

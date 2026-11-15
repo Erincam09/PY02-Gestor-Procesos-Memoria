@@ -5,6 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
+import auxiliares.estrategiasMemoria.DinamicaBestFit;
+import auxiliares.estrategiasMemoria.DinamicaFirstFit;
+import auxiliares.estrategiasMemoria.DinamicaNextFit;
+import auxiliares.estrategiasMemoria.Paginacion;
+import auxiliares.estrategiasMemoria.ParticionFijaDiferente;
+import auxiliares.estrategiasMemoria.ParticionFijaIgual;
+
 public class FabricaEstrategiasMemoria {
     private static final Map<String, BiFunction<Map<String, Integer>, List<Integer>, EstrategiaMemoria>> creadores = new LinkedHashMap<>();
     static {

@@ -4,6 +4,10 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
+import javax.swing.plaf.basic.BasicComboBoxUI;
+import javax.swing.plaf.basic.BasicComboPopup;
+import javax.swing.plaf.basic.BasicArrowButton;
+import javax.swing.plaf.basic.ComboPopup;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -280,6 +284,7 @@ public class VentanaPrincipal extends JFrame {
                     boolean seleccionada, boolean foco, int fila, int columna) {
                 super.getTableCellRendererComponent(tabla, valor, seleccionada, foco, fila, columna);
                 int posicion = tabla.convertRowIndexToModel(fila);
+                setHorizontalAlignment(columna == 0 ? CENTER : LEFT);
                 if (seleccionada) {
                     return this;
                 }
@@ -618,6 +623,49 @@ public class VentanaPrincipal extends JFrame {
         return panel;
     }
 
+    private JComboBox<String> crearSelectorNucleos() {
+        JComboBox<String> selector = new JComboBox<>();
+        selector.setBackground(PANEL_2);
+        selector.setForeground(TEXTO);
+        selector.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        selector.setPreferredSize(new Dimension(116, 24));
+        selector.setBorder(new LineBorder(BORDE));
+        selector.setMaximumRowCount(5);
+        selector.setRenderer(new DefaultListCellRenderer() {
+            public Component getListCellRendererComponent(JList<?> lista, Object valor,
+                    int indice, boolean seleccionada, boolean foco) {
+                super.getListCellRendererComponent(lista, valor, indice, seleccionada, foco);
+                setBackground(seleccionada ? ACENTO_OSCURO : PANEL_2);
+                setForeground(TEXTO);
+                setFont(new Font("Segoe UI", Font.BOLD, 12));
+                setBorder(new EmptyBorder(4, 8, 4, 8));
+                return this;
+            }
+        });
+        selector.setUI(new BasicComboBoxUI() {
+            protected JButton createArrowButton() {
+                JButton flecha = new BasicArrowButton(SwingConstants.SOUTH,
+                        PANEL_3, BORDE, ACENTO, PANEL_3);
+                flecha.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, BORDE));
+                return flecha;
+            }
+            protected ComboPopup createPopup() {
+                BasicComboPopup popup = new BasicComboPopup(comboBox);
+                popup.setBorder(new LineBorder(BORDE));
+                popup.getList().setBackground(PANEL_2);
+                popup.getList().setForeground(TEXTO);
+                popup.getList().setSelectionBackground(ACENTO_OSCURO);
+                popup.getList().setSelectionForeground(TEXTO);
+                return popup;
+            }
+            public void paintCurrentValueBackground(Graphics g, Rectangle area, boolean foco) {
+                g.setColor(PANEL_2);
+                g.fillRect(area.x, area.y, area.width, area.height);
+            }
+        });
+        return selector;
+    }
+
     private JPanel crearPanelBCP() {
 
         JPanel panel = crearTarjetaConTitulo(
@@ -627,10 +675,10 @@ public class VentanaPrincipal extends JFrame {
 
         panel.setLayout(new BorderLayout());
 
-        JPanel selector = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel selector = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         selector.setOpaque(false);
-        selector.add(etiquetaDato("Núcleo:"));
-        comboNucleos = new JComboBox<>();
+        selector.setBorder(new EmptyBorder(0, 0, 0, 0));
+        comboNucleos = crearSelectorNucleos();
         selector.add(comboNucleos);
         panel.add(selector, BorderLayout.NORTH);
 
@@ -1030,8 +1078,17 @@ public class VentanaPrincipal extends JFrame {
 
         header.setReorderingAllowed(false);
 
-        DefaultTableCellRenderer renderer =
-                new DefaultTableCellRenderer();
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer() {
+            public Component getTableCellRendererComponent(JTable tabla, Object valor,
+                    boolean seleccionada, boolean foco, int fila, int columna) {
+                super.getTableCellRendererComponent(tabla, valor, seleccionada, foco, fila, columna);
+                String nombre = tabla.getColumnName(columna);
+                boolean posicion = "Posición".equals(nombre)
+                        || "V.Pos".equals(nombre) || "Disco".equals(nombre);
+                setHorizontalAlignment(posicion ? CENTER : LEFT);
+                return this;
+            }
+        };
 
         renderer.setBorder(
                 new EmptyBorder(

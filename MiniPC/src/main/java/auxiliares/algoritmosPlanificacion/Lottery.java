@@ -1,6 +1,9 @@
-package auxiliares;
+package auxiliares.algoritmosPlanificacion;
 
 import java.util.List;
+
+import auxiliares.AlgoritmoPlanificacion;
+
 import java.util.ArrayList;
 import modelo.Proceso;
 

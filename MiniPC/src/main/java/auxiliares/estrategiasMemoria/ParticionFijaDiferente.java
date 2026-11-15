@@ -1,7 +1,9 @@
-package auxiliares;
+package auxiliares.estrategiasMemoria;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import auxiliares.EstrategiaMemoria;
 import modelo.AsignacionMemoria;
 import modelo.Memoria;
 

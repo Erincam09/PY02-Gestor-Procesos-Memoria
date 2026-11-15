@@ -1,7 +1,10 @@
-package auxiliares;
+package auxiliares.estrategiasMemoria;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import auxiliares.EstrategiaMemoria;
+import auxiliares.ListaMarcosLibres;
 import modelo.AsignacionMemoria;
 import modelo.Memoria;
 import modelo.TablaPaginas;

@@ -4,6 +4,17 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.function.Function;
 
+import auxiliares.algoritmosPlanificacion.FCFS;
+import auxiliares.algoritmosPlanificacion.GuaranteedScheduling;
+import auxiliares.algoritmosPlanificacion.HRRN;
+import auxiliares.algoritmosPlanificacion.Lottery;
+import auxiliares.algoritmosPlanificacion.MultilevelFQueue;
+import auxiliares.algoritmosPlanificacion.PorPrioridad;
+import auxiliares.algoritmosPlanificacion.RR;
+import auxiliares.algoritmosPlanificacion.SPN;
+import auxiliares.algoritmosPlanificacion.SRT;
+import auxiliares.algoritmosPlanificacion.SelfishRR;
+
 public class FabricaAlgoritmos {
     private static final Map<String, Function<Map<String, Integer>, AlgoritmoPlanificacion>> creadores = new LinkedHashMap<>();
     static {

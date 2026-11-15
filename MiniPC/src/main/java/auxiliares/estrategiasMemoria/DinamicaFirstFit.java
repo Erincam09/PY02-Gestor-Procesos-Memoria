@@ -1,5 +1,7 @@
-package auxiliares;
+package auxiliares.estrategiasMemoria;
 
+import auxiliares.AdministradorMemoria;
+import auxiliares.EstrategiaMemoria;
 import modelo.AsignacionMemoria;
 import modelo.Memoria;
 
