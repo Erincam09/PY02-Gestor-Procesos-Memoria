@@ -15,6 +15,8 @@ public class MiniPCControlador {
     private Simulador simulador;
     private Timer timerEjecucion;
     private DialogoDiagrama dialogoDiagrama;
+    private DialogoEstadisticas dialogoEstadisticas;
+    private final GestorEstadisticas gestorEstadisticas = new GestorEstadisticas();
     private Memoria memoria;
     private MemoriaVirtual memoriaVirtual;
     private AlmacenamientoSecundario disco;
@@ -31,6 +33,7 @@ public class MiniPCControlador {
         vista.getBtnReiniciar().addActionListener(e -> reiniciarSistema());
         vista.getBtnLlegadas().addActionListener(e -> configurarLlegadas());
         vista.getBtnDiagrama().addActionListener(e -> abrirDiagrama());
+        vista.getBtnEstadisticas().addActionListener(e -> abrirEstadisticas());
         vista.getComboNucleos().addActionListener(e -> actualizarVistaCompleta());
         actualizarVistaCompleta();
     }
@@ -109,6 +112,23 @@ public class MiniPCControlador {
         }
     }
 
+    private void abrirEstadisticas() {
+        if (dialogoEstadisticas == null || !dialogoEstadisticas.isDisplayable()) {
+            dialogoEstadisticas = new DialogoEstadisticas(vista);
+        }
+        actualizarEstadisticas();
+        dialogoEstadisticas.setVisible(true);
+        dialogoEstadisticas.toFront();
+    }
+
+    private void actualizarEstadisticas() {
+        EstadisticaSimulacion resultado = simulador.getEstadisticaFinal();
+        gestorEstadisticas.registrar(resultado);
+        if (dialogoEstadisticas != null) {
+            dialogoEstadisticas.actualizar(resultado, gestorEstadisticas);
+        }
+    }
+
     public void ejecutarUnSegundo() {
         try {
             simulador.tick();
@@ -146,6 +166,7 @@ public class MiniPCControlador {
     }
 
     private void actualizarVistaCompleta() {
+        actualizarEstadisticas();
         actualizarMemoria();
         actualizarDisco();
         actualizarMemoriaVirtual();
@@ -347,6 +368,6 @@ public class MiniPCControlador {
         vista.getBtnCargarArchivos().setEnabled(!simulador.isIniciado());
         vista.getBtnConfiguracion().setEnabled(!automatico);
         vista.getBtnReiniciar().setEnabled(hayDatos);
-        vista.getBtnEstadisticas().setEnabled(false);
+        vista.getBtnEstadisticas().setEnabled(gestorEstadisticas.hayResultados());
     }
 }

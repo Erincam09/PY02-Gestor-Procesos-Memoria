@@ -9,6 +9,8 @@ public class Simulador {
     private final ConfiguracionSistema configuracion;
     private final Consumer<String> salida;
     private int reloj;
+    private ArrayList<EstadisticaProceso> resultadosProcesos;
+    private EstadisticaSimulacion estadisticaFinal;
     private ArrayList<RegistroGantt> historialGantt;
     private int siguientePid;
     private boolean llegadasConfirmadas;
@@ -35,6 +37,8 @@ public class Simulador {
 
     public void reiniciar() {
         reloj = 0;
+        resultadosProcesos = new ArrayList<>();
+        estadisticaFinal = null;
         historialGantt = new ArrayList<>();
         siguientePid = 1;
         iniciado = false;
@@ -112,6 +116,7 @@ public class Simulador {
             return;
         }
         inicializarVisualizacion();
+        if (haTerminado()) return;
         ArrayList<ResultadoSegundo> terminados = new ArrayList<>();
         for (Nucleo nucleo : nucleos) {
             // Capturar al que ejecuta este segundo, antes de preparar el siguiente.
@@ -148,6 +153,8 @@ public class Simulador {
             int alcance = programa.getCantInstrucciones();
             if (!estrategiaMemoria.puedeAlojar(memoria, alcance)) {
                 trabajo.setEstado("RECHAZADO");
+                resultadosProcesos.add(new EstadisticaProceso(trabajo, reloj,
+                        "El programa no cabe con la estrategia de memoria seleccionada"));
                 salida.accept("Programa rechazado por tamaño: " + programa.getNombreArchivo() + "\n");
                 continue;
             }
@@ -181,6 +188,8 @@ public class Simulador {
     private void finalizarProceso(ResultadoSegundo resultado) {
         Proceso proceso = resultado.getProceso();
         BCP bcp = proceso.getBcp();
+        // Conservar el resultado antes de liberar el BCP y eliminar el proceso.
+        resultadosProcesos.add(new EstadisticaProceso(proceso, resultado.getError()));
         if (proceso.getAsignacionMemoria() != null) {
             estrategiaMemoria.liberar(memoria, proceso.getAsignacionMemoria());
         }
@@ -246,6 +255,16 @@ public class Simulador {
         }
         return true;
     }
+    public EstadisticaSimulacion getEstadisticaFinal() {
+        if (!haTerminado()) return null;
+        if (estadisticaFinal == null) {
+            int[] ociosidad = new int[nucleos.size()];
+            for (Nucleo nucleo : nucleos) ociosidad[nucleo.getId()] = nucleo.getTiempoOcioso();
+            estadisticaFinal = new EstadisticaSimulacion(configuracion, reloj, resultadosProcesos, ociosidad);
+        }
+        return estadisticaFinal;
+    }
+
     public List<RegistroGantt> getHistorialGantt() {
         return new ArrayList<>(historialGantt);
     }
