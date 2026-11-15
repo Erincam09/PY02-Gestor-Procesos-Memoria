@@ -28,6 +28,8 @@ public class Simulador {
     private final AsignadorNucleos asignador = new AsignadorNucleos();
     private CargarPrograma cargador;
     private EstrategiaMemoria estrategiaMemoria;
+    private CargarPrograma cargadorVirtual;
+    private EstrategiaMemoria estrategiaMemoriaVirtual;
 
     public Simulador(ConfiguracionSistema configuracion, Consumer<String> salida) {
         this.configuracion = new ConfiguracionSistema(configuracion);
@@ -56,6 +58,10 @@ public class Simulador {
                 configuracion.getParametrosEstrategiaMemoria(), configuracion.getTamaniosParticiones());
         cargador = new CargarPrograma(estrategiaMemoria);
         estrategiaMemoria.iniciar(memoria);
+        estrategiaMemoriaVirtual = FabricaEstrategiasMemoria.crear(configuracion.getNombreEstrategiaMemoria(),
+                configuracion.getParametrosEstrategiaMemoria(), configuracion.getTamaniosParticionesVirtual());
+        estrategiaMemoriaVirtual.iniciar(memoriaVirtual);
+        cargadorVirtual = new CargarPrograma(estrategiaMemoriaVirtual);
         nucleos = new ArrayList<>();
         for (int i = 0; i < configuracion.getCantidadNucleos(); i++) {
             AlgoritmoPlanificacion algoritmo = FabricaAlgoritmos.crear(
@@ -160,11 +166,14 @@ public class Simulador {
             AsignacionMemoria asignacion = cargador.cargar(programa, memoria);
             int base = asignacion == null ? -1 : asignacion.getBase();
             int virtual = -1;
+            AsignacionMemoria asignacionVirtual = null;
             if (base == -1) {
-                virtual = memoriaVirtual.cargarPrograma(programa, siguientePid);
-                if (virtual == -1) {
+                asignacionVirtual = cargadorVirtual.cargar(programa, memoriaVirtual);
+                if (asignacionVirtual == null) {
                     continue;
                 }
+                memoriaVirtual.identificarProceso(asignacionVirtual, siguientePid);
+                virtual = asignacionVirtual.getBase();
             }
             CPU inicial = new CPU();
             inicial.setPC(base);
@@ -174,6 +183,7 @@ public class Simulador {
             bcp.setEstado(base == -1 ? "EN ESPERA" : "PREPARADO");
             Proceso proceso = new Proceso(programa, bcp);
             proceso.setAsignacionMemoria(asignacion);
+            proceso.setAsignacionVirtual(asignacionVirtual);
             proceso.setLlegada(trabajo.getTiempoLlegada());
             proceso.setTickets(trabajo.getTickets());
             nucleo.agregarProceso(proceso, reloj);
@@ -192,8 +202,8 @@ public class Simulador {
         if (proceso.getAsignacionMemoria() != null) {
             estrategiaMemoria.liberar(memoria, proceso.getAsignacionMemoria());
         }
-        if (bcp.getDireccionVirtual() != -1) {
-            memoriaVirtual.liberarRango(bcp.getDireccionVirtual(), bcp.getAlcance());
+        if (proceso.getAsignacionVirtual() != null) {
+            estrategiaMemoriaVirtual.liberar(memoriaVirtual, proceso.getAsignacionVirtual());
         }
         Trabajo trabajo = buscarTrabajo(proceso.getPrograma());
         trabajo.setEstado(resultado.getError() == null ? "FINALIZADO" : "ERROR");
@@ -211,11 +221,13 @@ public class Simulador {
             if (!bcp.getEstado().equals("EN ESPERA") || bcp.getDireccionVirtual() == -1) {
                 continue;
             }  
-            AsignacionMemoria asignacion = cargador.cargar(proceso.getPrograma(), memoria);
+            AsignacionMemoria origen = proceso.getAsignacionVirtual();
+            AsignacionMemoria asignacion = cargador.copiarDesdeMemoria(memoriaVirtual, origen, memoria);
             if (asignacion == null) {
                 continue;
             }
-            memoriaVirtual.liberarRango(bcp.getDireccionVirtual(), bcp.getAlcance());
+            estrategiaMemoriaVirtual.liberar(memoriaVirtual, origen);
+            proceso.setAsignacionVirtual(null);
             proceso.setAsignacionMemoria(asignacion);
             bcp.setDireccionVirtual(-1);
             bcp.setBase(asignacion.getBase());
@@ -275,6 +287,7 @@ public class Simulador {
     public ListaProcesos getListaProcesos() { return listaProcesos; }
     public Memoria getMemoria() { return memoria; }
     public EstrategiaMemoria getEstrategiaMemoria() { return estrategiaMemoria; }
+    public EstrategiaMemoria getEstrategiaMemoriaVirtual() { return estrategiaMemoriaVirtual; }
     public MemoriaVirtual getMemoriaVirtual() { return memoriaVirtual; }
     public AlmacenamientoSecundario getDisco() { return disco; }
 }

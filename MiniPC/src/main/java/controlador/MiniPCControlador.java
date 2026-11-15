@@ -199,17 +199,19 @@ public class MiniPCControlador {
         DefaultTableModel modelo = vista.getModeloMemoria();
         modelo.setRowCount(0);
         int[] particiones = new int[memoria.getTamanio()];
+        boolean[] reservadas = new boolean[memoria.getTamanio()];
         EstrategiaMemoria estrategia = simulador.getEstrategiaMemoria();
         boolean esDinamica = estrategia.getNombre().startsWith("Dinámica");
 
         for (int i = 0; i < particiones.length; i++) {
             particiones[i] = estrategia.getParticion(i);
         }
-        if (esDinamica) {
-            for (Proceso proceso : listaProcesos.getProcesos()) {
-                AsignacionMemoria asignacion = proceso.getAsignacionMemoria();
-                if (asignacion != null) {
-                    for (int posicion : asignacion.getPosiciones()) {
+        for (Proceso proceso : listaProcesos.getProcesos()) {
+            AsignacionMemoria asignacion = proceso.getAsignacionMemoria();
+            if (asignacion != null) {
+                for (int posicion : asignacion.getPosicionesReservadas()) {
+                    reservadas[posicion] = true;
+                    if (esDinamica) {
                         particiones[posicion] = proceso.getPid();
                     }
                 }
@@ -222,6 +224,8 @@ public class MiniPCControlador {
             if (contenido == null) {
                 if (i < memoria.getEspacioKernel()) {
                     contenido = "Libre / Kernel";
+                } else if (reservadas[i]) {
+                    contenido = "Reservado";
                 } else {
                     contenido = "Libre";
                 }
@@ -260,15 +264,21 @@ public class MiniPCControlador {
     private void actualizarMemoriaVirtual() {
         DefaultTableModel modelo = vista.getModeloMemoriaVirtual();
         modelo.setRowCount(0);
+        EstrategiaMemoria estrategia = simulador.getEstrategiaMemoriaVirtual();
+        boolean esDinamica = estrategia.getNombre().startsWith("Dinámica");
+        int[] particiones = new int[memoriaVirtual.getTamanio()];
+        for (int i = 0; i < particiones.length; i++) {
+            particiones[i] = esDinamica ? memoriaVirtual.getPid(i) : estrategia.getParticion(i);
+        }
+        vista.setParticionesVirtual(particiones);
 
         for (int i = 0; i < memoriaVirtual.getTamanio(); i++) {
             String contenido = memoriaVirtual.leer(i);
+            int pid = memoriaVirtual.getPid(i);
 
             if (contenido == null) {
-                contenido = "Libre";
+                contenido = pid == -1 ? "Libre" : "Reservado";
             }
-
-            int pid = memoriaVirtual.getPid(i);
 
             modelo.addRow(new Object[]{
                 i,

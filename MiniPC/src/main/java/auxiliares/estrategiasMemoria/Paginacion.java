@@ -6,7 +6,7 @@ import java.util.List;
 import auxiliares.EstrategiaMemoria;
 import auxiliares.ListaMarcosLibres;
 import modelo.AsignacionMemoria;
-import modelo.Memoria;
+import modelo.EspacioMemoria;
 import modelo.TablaPaginas;
 
 public class Paginacion implements EstrategiaMemoria {
@@ -16,6 +16,9 @@ public class Paginacion implements EstrategiaMemoria {
     private ListaMarcosLibres marcosLibres;
 
     public Paginacion(int tamanioPagina) {
+        if (tamanioPagina <= 0) {
+            throw new IllegalArgumentException("El tamaño de página debe ser mayor que cero");
+        }
         this.tamanioPagina = tamanioPagina;
     }
 
@@ -25,17 +28,20 @@ public class Paginacion implements EstrategiaMemoria {
     }
 
    
-    private void crearMarcos(Memoria memoria) {
+    private void crearMarcos(EspacioMemoria memoria) {
         if (marcosLibres != null) {
             return;
         }
         inicioUsuario = memoria.getEspacioKernel();
         cantidadMarcos = (memoria.getTamanio() - inicioUsuario) / tamanioPagina;
+        if (cantidadMarcos == 0) {
+            throw new IllegalArgumentException("No cabe un marco en la memoria indicada");
+        }
         marcosLibres = new ListaMarcosLibres(cantidadMarcos);
     }
 
     
-    public void iniciar(Memoria memoria) {
+    public void iniciar(EspacioMemoria memoria) {
         crearMarcos(memoria);
     }
 
@@ -50,7 +56,7 @@ public class Paginacion implements EstrategiaMemoria {
 
    
     
-    public boolean puedeAlojar(Memoria memoria, int cantidad) {
+    public boolean puedeAlojar(EspacioMemoria memoria, int cantidad) {
         crearMarcos(memoria);
         return paginasNecesarias(cantidad) <= cantidadMarcos;
     }
@@ -61,7 +67,10 @@ public class Paginacion implements EstrategiaMemoria {
 
    
     
-    public AsignacionMemoria asignar(Memoria memoria, int cantidad) {
+    public AsignacionMemoria asignar(EspacioMemoria memoria, int cantidad) {
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("La cantidad de posiciones debe ser mayor que cero");
+        }
         crearMarcos(memoria);
         int paginas = paginasNecesarias(cantidad);
         if (marcosLibres.cantidad() < paginas) {
@@ -81,8 +90,8 @@ public class Paginacion implements EstrategiaMemoria {
     }
 
     
-    public void liberar(Memoria memoria, AsignacionMemoria asignacion) {
-        for (int posicion : asignacion.getPosiciones()) {
+    public void liberar(EspacioMemoria memoria, AsignacionMemoria asignacion) {
+        for (int posicion : asignacion.getPosicionesReservadas()) {
             memoria.liberar(posicion);
         }
         for (int marco : asignacion.getTablaPaginas().getMarcos()) {

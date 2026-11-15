@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.swing.*;
 import javax.swing.border.*;
 import modelo.ConfiguracionSistema;
@@ -34,6 +33,7 @@ public class DialogoConfiguracion extends JDialog {
     private JSpinner spinnerParticiones;
     private JSpinner spinnerPagina;
     private JTextField txtTamanios;
+    private JTextField txtTamaniosVirtual;
 
     private JSpinner spinnerASRR;
     private JSpinner spinnerBSRR;
@@ -288,7 +288,7 @@ public class DialogoConfiguracion extends JDialog {
         panel.add(
                 crearTitulo(
                         "Estrategia de asignación de memoria",
-                        "Método usado para ubicar los programas en memoria."
+                        "La estrategia se aplica en RAM y virtual; ambas usan el mismo tamaño de página."
                 ),
                 BorderLayout.NORTH
         );
@@ -300,14 +300,16 @@ public class DialogoConfiguracion extends JDialog {
         spinnerParticiones = crearSpinner(parametros.getOrDefault("particiones", 4), 1, 256, 1);
         spinnerPagina = crearSpinner(parametros.getOrDefault("pagina", 8), 1, 256, 1);
 
-        txtTamanios = new JTextField(configuracion.getTamaniosParticiones().stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(",")));
+        txtTamanios = new JTextField(formatearTamanios(configuracion.getTamaniosParticiones()));
         txtTamanios.setBackground(PANEL_2);
         txtTamanios.setForeground(TEXTO);
         txtTamanios.setCaretColor(TEXTO);
+        txtTamaniosVirtual = new JTextField(formatearTamanios(configuracion.getTamaniosParticionesVirtual()));
+        txtTamaniosVirtual.setBackground(PANEL_2);
+        txtTamaniosVirtual.setForeground(TEXTO);
+        txtTamaniosVirtual.setCaretColor(TEXTO);
 
-        JPanel filas = new JPanel(new GridLayout(4, 2, 8, 6));
+        JPanel filas = new JPanel(new GridLayout(5, 2, 8, 6));
         filas.setOpaque(false);
         filas.add(crearDato("Estrategia"));
         filas.add(comboEstrategiaMemoria);
@@ -315,8 +317,10 @@ public class DialogoConfiguracion extends JDialog {
         filas.add(spinnerPagina);
         filas.add(crearDato("Particiones (fijo igual)"));
         filas.add(spinnerParticiones);
-        filas.add(crearDato("Tamaños (fijo diferente, separados por coma)"));
+        filas.add(crearDato("Tamaños RAM (fijo diferente, por coma)"));
         filas.add(txtTamanios);
+        filas.add(crearDato("Tamaños virtual (fijo diferente, por coma)"));
+        filas.add(txtTamaniosVirtual);
 
         panel.add(filas, BorderLayout.CENTER);
 
@@ -330,6 +334,7 @@ public class DialogoConfiguracion extends JDialog {
         spinnerParticiones.setEnabled("Partición Fija Igual".equals(estrategia));
         spinnerPagina.setEnabled("Paginación".equals(estrategia));
         txtTamanios.setEnabled("Partición Fija Diferente".equals(estrategia));
+        txtTamaniosVirtual.setEnabled("Partición Fija Diferente".equals(estrategia));
     }
 
     private static List<Integer> leerTamanios(String texto) {
@@ -342,6 +347,17 @@ public class DialogoConfiguracion extends JDialog {
             tamanios.add(valor);
         }
         return tamanios;
+    }
+
+    private static String formatearTamanios(List<Integer> tamanios) {
+        StringBuilder texto = new StringBuilder();
+        for (int tamanio : tamanios) {
+            if (texto.length() > 0) {
+                texto.append(",");
+            }
+            texto.append(tamanio);
+        }
+        return texto.toString();
     }
 
     private JPanel crearPanelDisco() {
@@ -478,6 +494,7 @@ public class DialogoConfiguracion extends JDialog {
         spinnerParticiones.setValue(4);
         spinnerPagina.setValue(8);
         txtTamanios.setText("64,64,128");
+        txtTamaniosVirtual.setText("16,16,32");
     }
 
     private void guardar() {
@@ -501,26 +518,41 @@ public class DialogoConfiguracion extends JDialog {
         String estrategiaMemoria = (String) comboEstrategiaMemoria.getSelectedItem();
         int espacioUsuario = memoria - ConfiguracionSistema.calcularEspacioKernel(memoria);
         List<Integer> tamanios = configuracion.getTamaniosParticiones();
+        List<Integer> tamaniosVirtual = configuracion.getTamaniosParticionesVirtual();
+        int espacioVirtual = disco / 8;
         if ("Partición Fija Diferente".equals(estrategiaMemoria)) {
             try {
                 tamanios = leerTamanios(txtTamanios.getText());
+                tamaniosVirtual = leerTamanios(txtTamaniosVirtual.getText());
             } catch (IllegalArgumentException error) {
                 JOptionPane.showMessageDialog(this, "Los tamaños de partición deben ser enteros positivos separados por comas.");
                 return;
             }
-            int suma = tamanios.stream().mapToInt(Integer::intValue).sum();
+            long suma = 0;
+            for (int tamanio : tamanios) {
+                suma += tamanio;
+            }
             if (suma > espacioUsuario) {
                 JOptionPane.showMessageDialog(this, "La suma de las particiones (" + suma
                         + ") supera el espacio de usuario (" + espacioUsuario + ").");
                 return;
             }
+            long sumaVirtual = 0;
+            for (int tamanio : tamaniosVirtual) {
+                sumaVirtual += tamanio;
+            }
+            if (sumaVirtual > espacioVirtual) {
+                JOptionPane.showMessageDialog(this, "Las particiones de virtual suman " + sumaVirtual
+                        + " y solo hay " + espacioVirtual + " posiciones disponibles.");
+                return;
+            }
         } else if ("Partición Fija Igual".equals(estrategiaMemoria)
-                && (int) spinnerParticiones.getValue() > espacioUsuario) {
-            JOptionPane.showMessageDialog(this, "El número de particiones supera el espacio de usuario (" + espacioUsuario + ").");
+                && (int) spinnerParticiones.getValue() > Math.min(espacioUsuario, espacioVirtual)) {
+            JOptionPane.showMessageDialog(this, "El número de particiones debe caber tanto en RAM como en virtual.");
             return;
         } else if ("Paginación".equals(estrategiaMemoria)
-                && (int) spinnerPagina.getValue() > espacioUsuario) {
-            JOptionPane.showMessageDialog(this, "El tamaño de página supera el espacio de usuario (" + espacioUsuario + ").");
+                && (int) spinnerPagina.getValue() > Math.min(espacioUsuario, espacioVirtual)) {
+            JOptionPane.showMessageDialog(this, "El tamaño de página debe caber tanto en RAM como en virtual.");
             return;
         }
 
@@ -535,6 +567,7 @@ public class DialogoConfiguracion extends JDialog {
         parametrosMemoria.put("pagina", (int) spinnerPagina.getValue());
         configuracion.setParametrosEstrategiaMemoria(parametrosMemoria);
         configuracion.setTamaniosParticiones(tamanios);
+        configuracion.setTamaniosParticionesVirtual(tamaniosVirtual);
 
         int a = (int) spinnerASRR.getValue();
         int b = (int) spinnerBSRR.getValue();

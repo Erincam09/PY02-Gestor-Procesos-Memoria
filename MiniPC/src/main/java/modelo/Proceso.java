@@ -13,6 +13,7 @@ public class Proceso {
     private int nivelCola;
     private int tickets = 1;
     private AsignacionMemoria asignacionMemoria;
+    private AsignacionMemoria asignacionVirtual;
 
     public Proceso(Programa programa, BCP bcp) {
         this.programa = programa;
@@ -41,6 +42,8 @@ public class Proceso {
     public void setPrioridad(int valor) { bcp.setPrioridad(valor); }
     public AsignacionMemoria getAsignacionMemoria() { return asignacionMemoria; }
     public void setAsignacionMemoria(AsignacionMemoria valor) { asignacionMemoria = valor; }
+    public AsignacionMemoria getAsignacionVirtual() { return asignacionVirtual; }
+    public void setAsignacionVirtual(AsignacionMemoria valor) { asignacionVirtual = valor; }
     public int getTickets() { return tickets; }
     public void setTickets(int valor) { tickets = valor; }
     public int getEspera(int reloj) {

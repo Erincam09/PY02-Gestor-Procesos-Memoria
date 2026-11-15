@@ -2,7 +2,7 @@ package auxiliares.estrategiasMemoria;
 
 import auxiliares.EstrategiaMemoria;
 import modelo.AsignacionMemoria;
-import modelo.Memoria;
+import modelo.EspacioMemoria;
 
 public class DinamicaNextFit implements EstrategiaMemoria {
     private int siguiente = -1;
@@ -11,7 +11,7 @@ public class DinamicaNextFit implements EstrategiaMemoria {
         return "Dinámica Next Fit";
     }
 
-    public AsignacionMemoria asignar(Memoria memoria, int cantidad) {
+    public AsignacionMemoria asignar(EspacioMemoria memoria, int cantidad) {
         if (cantidad <= 0) {
             throw new IllegalArgumentException("Cantidad debe ser mayor que cero");
         }

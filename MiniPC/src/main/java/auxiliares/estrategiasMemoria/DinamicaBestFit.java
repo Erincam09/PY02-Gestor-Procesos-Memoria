@@ -2,7 +2,7 @@ package auxiliares.estrategiasMemoria;
 
 import auxiliares.EstrategiaMemoria;
 import modelo.AsignacionMemoria;
-import modelo.Memoria;
+import modelo.EspacioMemoria;
 
 public class DinamicaBestFit implements EstrategiaMemoria {
     
@@ -10,7 +10,7 @@ public class DinamicaBestFit implements EstrategiaMemoria {
         return "Dinámica Best Fit";
     }
 
-    public AsignacionMemoria asignar(Memoria memoria, int cantidad) {
+    public AsignacionMemoria asignar(EspacioMemoria memoria, int cantidad) {
         if (cantidad <= 0) {
             throw new IllegalArgumentException("Cantidad debe ser mayor que cero");
         }

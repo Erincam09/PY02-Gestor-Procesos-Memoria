@@ -1,9 +1,9 @@
 package auxiliares;
 
-import modelo.Memoria;
+import modelo.EspacioMemoria;
 
 public class AdministradorMemoria {
-    public int buscarEspacio(Memoria memoria, int cantidad) {
+    public int buscarEspacio(EspacioMemoria memoria, int cantidad) {
         if (cantidad <= 0) {
             throw new IllegalArgumentException("La cantidad de espacios a buscar debe ser mayor que cero");
         }

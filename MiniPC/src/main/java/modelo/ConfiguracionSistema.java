@@ -14,6 +14,7 @@ public class ConfiguracionSistema {
     private String nombreEstrategiaMemoria = "Dinámica First Fit";
     private Map<String, Integer> parametrosEstrategiaMemoria = new HashMap<>(Map.of("particiones", 4));
     private List<Integer> tamaniosParticiones = new ArrayList<>(List.of(64, 64, 128));
+    private List<Integer> tamaniosParticionesVirtual = new ArrayList<>(List.of(16, 16, 32));
     public static final int PORCENTAJE_KERNEL = 75;
     private int cantidadNucleos = 1;
 
@@ -42,6 +43,7 @@ public class ConfiguracionSistema {
         nombreEstrategiaMemoria = otra.getNombreEstrategiaMemoria();
         parametrosEstrategiaMemoria.putAll(otra.getParametrosEstrategiaMemoria());
         tamaniosParticiones = otra.getTamaniosParticiones();
+        tamaniosParticionesVirtual = otra.getTamaniosParticionesVirtual();
     }
 
     public String getNombreAlgoritmo() { return nombreAlgoritmo; }
@@ -68,6 +70,14 @@ public class ConfiguracionSistema {
     }
     public static int calcularEspacioKernel(int tamanio) {
         return tamanio * PORCENTAJE_KERNEL / 100;
+    }
+
+    public List<Integer> getTamaniosParticionesVirtual() {
+        return new ArrayList<>(tamaniosParticionesVirtual);
+    }
+
+    public void setTamaniosParticionesVirtual(List<Integer> tamanios) {
+        tamaniosParticionesVirtual = new ArrayList<>(tamanios);
     }
 
     public int getCantidadNucleos() {

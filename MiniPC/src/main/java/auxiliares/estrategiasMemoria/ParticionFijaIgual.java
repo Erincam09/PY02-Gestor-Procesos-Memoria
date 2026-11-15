@@ -2,7 +2,7 @@ package auxiliares.estrategiasMemoria;
 
 import auxiliares.EstrategiaMemoria;
 import modelo.AsignacionMemoria;
-import modelo.Memoria;
+import modelo.EspacioMemoria;
 
 public class ParticionFijaIgual implements EstrategiaMemoria {
     private final int particiones;
@@ -21,11 +21,11 @@ public class ParticionFijaIgual implements EstrategiaMemoria {
         return "Partición Fija Igual";
     }
 
-    public void iniciar(Memoria memoria) {
+    public void iniciar(EspacioMemoria memoria) {
         crearParticiones(memoria);
     }
 
-    private void crearParticiones(Memoria memoria) {
+    private void crearParticiones(EspacioMemoria memoria) {
         if (inicios != null) {
             return;
         }
@@ -58,12 +58,12 @@ public class ParticionFijaIgual implements EstrategiaMemoria {
         return -1;
     }
 
-    public boolean puedeAlojar(Memoria memoria, int cantidad) {
+    public boolean puedeAlojar(EspacioMemoria memoria, int cantidad) {
         crearParticiones(memoria);
         return cantidad > 0 && cantidad <= tamanioParticion;
     }
   
-    public AsignacionMemoria asignar(Memoria memoria, int cantidad) {
+    public AsignacionMemoria asignar(EspacioMemoria memoria, int cantidad) {
         crearParticiones(memoria);
         if (cantidad <= 0) {
             throw new IllegalArgumentException("Cantidad debe ser mayor a 0");
@@ -80,8 +80,8 @@ public class ParticionFijaIgual implements EstrategiaMemoria {
         return null;
     }
 
-    public void liberar(Memoria memoria, AsignacionMemoria asignacion) {
-        for (int posicion: asignacion.getPosiciones()) {
+    public void liberar(EspacioMemoria memoria, AsignacionMemoria asignacion) {
+        for (int posicion: asignacion.getPosicionesReservadas()) {
             memoria.liberar(posicion);
         }
         for (int i = 0; i < particiones; i++) {

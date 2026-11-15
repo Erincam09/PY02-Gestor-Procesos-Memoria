@@ -2,7 +2,7 @@ package modelo;
 
 import java.util.Arrays;
 
-public class MemoriaVirtual {
+public class MemoriaVirtual implements EspacioMemoria {
     private AlmacenamientoSecundario almacenamiento;
     private int[] pidPorPosicion;
 
@@ -17,6 +17,21 @@ public class MemoriaVirtual {
         int posicionDisco = obtenerPosicionDisco(posicionVirtual);
         almacenamiento.escribir(posicionDisco, contenido);
         pidPorPosicion[posicionVirtual] = pid;
+    }
+
+    public void escribir(int posicionVirtual, String contenido) {
+        validarPosicion(posicionVirtual);
+        almacenamiento.escribir(obtenerPosicionDisco(posicionVirtual), contenido);
+    }
+
+    public int getEspacioKernel() {
+        return 0; // Toda la zona virtual está disponible para procesos.
+    }
+
+    public void identificarProceso(AsignacionMemoria asignacion, int pid) {
+        for (int posicion : asignacion.getPosicionesReservadas()) {
+            pidPorPosicion[posicion] = pid;
+        }
     }
 
     public String leer(int posicionVirtual) {
@@ -82,52 +97,4 @@ public class MemoriaVirtual {
         return almacenamiento;
     }
 
-    public int buscarEspacioContinuo(int cantidad) {
-        if (cantidad <= 0 || cantidad > getTamanio()) {
-            return -1;
-        }
-        for (int inicio = 0; inicio <= getTamanio() - cantidad; inicio++) {
-            boolean libre = true;
-
-            for (int i = 0; i < cantidad; i++) {
-                if (!estaLibre(inicio + i)) {
-                    libre = false;
-                    break;
-                }
-            }
-            if (libre) {
-                return inicio;
-            }
-        }
-
-        return -1;
-    }
-
-    public int cargarPrograma(Programa programa, int pid) {
-        if (programa == null) {
-            throw new IllegalArgumentException("El programa no puede ser nulo.");
-        }
-        if (pid < 0) {
-            throw new IllegalArgumentException("El PID no puede ser negativo.");
-        }
-        int cantidad = programa.getCantInstrucciones();
-        int inicio = buscarEspacioContinuo(cantidad);
-        if (inicio == -1) {
-            return -1;
-        }
-        for (int i = 0; i < cantidad; i++) {
-            String instruccion = programa.getInstrucciones().get(i).getEntradaTexto();
-            escribir(inicio + i, instruccion, pid);
-        }
-        return inicio;
-    }
-
-    public void liberarRango(int inicio, int cantidad) {
-        if (inicio < 0 || cantidad <= 0 || inicio + cantidad > getTamanio()) {
-            throw new IllegalArgumentException("El rango de memoria virtual es inválido.");
-        }
-        for (int i = inicio; i < inicio + cantidad; i++) {
-            liberar(i);
-        }
-    }
 }

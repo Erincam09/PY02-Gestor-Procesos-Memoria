@@ -5,7 +5,7 @@ import java.util.List;
 
 import auxiliares.EstrategiaMemoria;
 import modelo.AsignacionMemoria;
-import modelo.Memoria;
+import modelo.EspacioMemoria;
 
 public class ParticionFijaDiferente implements EstrategiaMemoria {
     private final List<Integer> tamanios;
@@ -25,7 +25,7 @@ public class ParticionFijaDiferente implements EstrategiaMemoria {
     }
 
     
-    public void iniciar(Memoria memoria) {
+    public void iniciar(EspacioMemoria memoria) {
         crearParticiones(memoria);
     }
 
@@ -43,11 +43,21 @@ public class ParticionFijaDiferente implements EstrategiaMemoria {
     }
 
     
-    private void crearParticiones(Memoria memoria) {
+    private void crearParticiones(EspacioMemoria memoria) {
         if (inicios != null) {
             return;
         }
         int cantidad = tamanios.size();
+        long suma = 0;
+        for (int tamanio : tamanios) {
+            if (tamanio <= 0) {
+                throw new IllegalArgumentException("Los tamaños de partición deben ser positivos");
+            }
+            suma += tamanio;
+        }
+        if (cantidad == 0 || suma > memoria.getTamanio() - memoria.getEspacioKernel()) {
+            throw new IllegalArgumentException("Las particiones no caben en la memoria indicada");
+        }
         inicios = new int[cantidad];
         tamaniosParticion = new int[cantidad];
         ocupada = new boolean[cantidad];
@@ -61,7 +71,8 @@ public class ParticionFijaDiferente implements EstrategiaMemoria {
 
     
     
-    public boolean puedeAlojar(Memoria memoria, int cantidad) {
+    public boolean puedeAlojar(EspacioMemoria memoria, int cantidad) {
+        crearParticiones(memoria);
         for (int tamanio : tamanios) {
             if (cantidad <= tamanio) {
                 return true;
@@ -72,7 +83,7 @@ public class ParticionFijaDiferente implements EstrategiaMemoria {
 
     
    
-    public AsignacionMemoria asignar(Memoria memoria, int cantidad) {
+    public AsignacionMemoria asignar(EspacioMemoria memoria, int cantidad) {
         crearParticiones(memoria);
         int elegida = -1;
         for (int i = 0; i < inicios.length; i++) {
@@ -90,8 +101,8 @@ public class ParticionFijaDiferente implements EstrategiaMemoria {
     }
 
     
-    public void liberar(Memoria memoria, AsignacionMemoria asignacion) {
-        for (int posicion : asignacion.getPosiciones()) {
+    public void liberar(EspacioMemoria memoria, AsignacionMemoria asignacion) {
+        for (int posicion : asignacion.getPosicionesReservadas()) {
             memoria.liberar(posicion);
         }
         for (int i = 0; i < inicios.length; i++) {

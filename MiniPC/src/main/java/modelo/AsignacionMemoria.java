@@ -63,4 +63,14 @@ public class AsignacionMemoria {
     public List<Integer> getPosiciones() {
         return new ArrayList<>(posiciones);
     }
+
+    // Incluye el espacio sobrante de una partición o de la última página.
+    public List<Integer> getPosicionesReservadas() {
+        List<Integer> reservadas = new ArrayList<>();
+        for (int i = 0; i < reservado; i++) {
+            int posicion = tablaPaginas == null ? getBase() + i : tablaPaginas.traducir(i);
+            reservadas.add(posicion);
+        }
+        return reservadas;
+    }
 }

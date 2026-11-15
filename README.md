@@ -48,9 +48,11 @@ El simulador permite observar la ejecución de programas ASM, la planificación 
 - Particiones fijas de tamaños iguales.
 - Particiones fijas de tamaños diferentes.
 - Particiones dinámicas con First Fit, Next Fit y Best Fit.
-- Paginación en RAM.
+- Paginación en RAM y memoria virtual.
 
-La memoria virtual utiliza actualmente bloques contiguos dentro del almacenamiento secundario.
+La estrategia seleccionada se aplica tanto en RAM como en la zona virtual del almacenamiento, con reservas independientes. En particiones fijas iguales se utiliza la misma cantidad de particiones en ambas memorias; los tamaños diferentes se configuran por separado para RAM y virtual.
+
+En paginación se utiliza el mismo tamaño de página en ambas memorias. Si no hay suficientes marcos libres en RAM, todas las páginas del proceso se guardan en virtual. El proceso espera hasta que puedan reservarse todos sus marcos en RAM; entonces se copia página por página y se liberan sus marcos virtuales. Los marcos asignados pueden estar separados. Un programa que no puede caber completo en RAM se rechaza por tamaño.
 
 ## Requisitos
 

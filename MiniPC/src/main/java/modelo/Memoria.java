@@ -10,7 +10,7 @@ import java.util.Arrays;
  *
  * @author erinc
  */
-public class Memoria {
+public class Memoria implements EspacioMemoria {
     private String[] memoriaP;
     private int espacioKernel;
     
@@ -103,4 +103,4 @@ public class Memoria {
     public String[] getMemoriaP() {
         return memoriaP;
     }
-}   
+}

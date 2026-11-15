@@ -48,6 +48,7 @@ public class VentanaPrincipal extends JFrame {
 
     private JTable tblMemoria;
     private int[] particionesMemoria = new int[0];
+    private int[] particionesVirtual = new int[0];
    
     private static final Color[] COLORES_PARTICION = {
         new Color(85, 60, 125),
@@ -491,6 +492,26 @@ public class VentanaPrincipal extends JFrame {
         tblMemoriaVirtual = crearTabla(
                 modeloMemoriaVirtual
         );
+
+        DefaultTableCellRenderer rendererVirtual = new DefaultTableCellRenderer() {
+            public Component getTableCellRendererComponent(JTable tabla, Object valor,
+                    boolean seleccionada, boolean foco, int fila, int columna) {
+                super.getTableCellRendererComponent(tabla, valor, seleccionada, foco, fila, columna);
+                int posicion = tabla.convertRowIndexToModel(fila);
+                setHorizontalAlignment(columna == 2 ? LEFT : CENTER);
+                if (!seleccionada) {
+                    if (posicion < particionesVirtual.length && particionesVirtual[posicion] >= 0) {
+                        setBackground(COLORES_PARTICION[particionesVirtual[posicion] % COLORES_PARTICION.length]);
+                    } else {
+                        setBackground(tabla.getBackground());
+                    }
+                    setForeground(TEXTO);
+                }
+                return this;
+            }
+        };
+        rendererVirtual.setBorder(new EmptyBorder(0, 6, 0, 6));
+        tblMemoriaVirtual.setDefaultRenderer(Object.class, rendererVirtual);
 
         tblMemoriaVirtual
                 .getColumnModel()
@@ -1610,6 +1631,11 @@ public class VentanaPrincipal extends JFrame {
 
     public void setParticionesMemoria(int[] particiones) {
         particionesMemoria = particiones;
+    }
+
+    public void setParticionesVirtual(int[] particiones) {
+        particionesVirtual = particiones;
+        tblMemoriaVirtual.repaint();
     }
 
     public DefaultTableModel getModeloMemoria() {
