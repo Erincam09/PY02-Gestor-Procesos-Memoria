@@ -14,6 +14,7 @@ public class MiniPCControlador {
     private ConfiguracionSistema configuracion = new ConfiguracionSistema();
     private Simulador simulador;
     private Timer timerEjecucion;
+    private DialogoDiagrama dialogoDiagrama;
     private Memoria memoria;
     private MemoriaVirtual memoriaVirtual;
     private AlmacenamientoSecundario disco;
@@ -29,6 +30,7 @@ public class MiniPCControlador {
         vista.getBtnEjecutarAutomatico().addActionListener(e -> iniciarAutomatico());
         vista.getBtnReiniciar().addActionListener(e -> reiniciarSistema());
         vista.getBtnLlegadas().addActionListener(e -> configurarLlegadas());
+        vista.getBtnDiagrama().addActionListener(e -> abrirDiagrama());
         vista.getComboNucleos().addActionListener(e -> actualizarVistaCompleta());
         actualizarVistaCompleta();
     }
@@ -88,6 +90,23 @@ public class MiniPCControlador {
             vista.setEstadoSistema("Listo para ejecutar");
         }
         actualizarVistaCompleta();
+    }
+
+    private void abrirDiagrama() {
+        if (dialogoDiagrama == null || !dialogoDiagrama.isDisplayable()) {
+            dialogoDiagrama = new DialogoDiagrama(vista);
+        }
+        actualizarDiagrama();
+        dialogoDiagrama.setVisible(true);
+        dialogoDiagrama.toFront();
+    }
+
+    private void actualizarDiagrama() {
+        if (dialogoDiagrama != null) {
+            dialogoDiagrama.actualizar(simulador.getHistorialGantt(),
+                    listaProcesos.getProcesos(), simulador.getReloj(), simulador.getNucleos().size(),
+                    configuracion.getNombreAlgoritmo());
+        }
     }
 
     public void ejecutarUnSegundo() {
@@ -152,6 +171,7 @@ public class MiniPCControlador {
             }
         }
         actualizarBotones();
+        actualizarDiagrama();
     }
 
     private void actualizarMemoria() {

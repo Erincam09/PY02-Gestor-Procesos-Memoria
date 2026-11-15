@@ -9,6 +9,7 @@ public class Simulador {
     private final ConfiguracionSistema configuracion;
     private final Consumer<String> salida;
     private int reloj;
+    private ArrayList<RegistroGantt> historialGantt;
     private int siguientePid;
     private boolean llegadasConfirmadas;
     private boolean iniciado;
@@ -34,6 +35,7 @@ public class Simulador {
 
     public void reiniciar() {
         reloj = 0;
+        historialGantt = new ArrayList<>();
         siguientePid = 1;
         iniciado = false;
         llegadasConfirmadas = false;
@@ -112,7 +114,12 @@ public class Simulador {
         inicializarVisualizacion();
         ArrayList<ResultadoSegundo> terminados = new ArrayList<>();
         for (Nucleo nucleo : nucleos) {
+            // Capturar al que ejecuta este segundo, antes de preparar el siguiente.
+            Proceso ejecutado = nucleo.getProcesoActual();
             ResultadoSegundo resultado = nucleo.ejecutarSegundo(reloj);
+            int pid = ejecutado == null ? -1 : ejecutado.getPid();
+            String programa = ejecutado == null ? "Ocioso" : ejecutado.getPrograma().getNombreArchivo();
+            historialGantt.add(new RegistroGantt(nucleo.getId(), pid, programa, reloj, reloj + 1));
             if (resultado.isTerminado()) {
                 terminados.add(resultado);
             }
@@ -238,6 +245,9 @@ public class Simulador {
             }
         }
         return true;
+    }
+    public List<RegistroGantt> getHistorialGantt() {
+        return new ArrayList<>(historialGantt);
     }
     public int getReloj() { return reloj; }
     public boolean isIniciado() { return iniciado; }

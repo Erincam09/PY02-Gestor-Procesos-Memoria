@@ -83,6 +83,7 @@ public class VentanaPrincipal extends JFrame {
     private JLabel lblProcesoActual;
     private JLabel lblInstruccionActual;
     private JButton btnLlegadas;
+    private JButton btnDiagrama;
     private JComboBox<String> comboNucleos;
     private DefaultTableModel modeloListos;
 
@@ -877,6 +878,8 @@ public class VentanaPrincipal extends JFrame {
         btnEstadisticas.setVisible(false);
         btnLlegadas = crearBotonSecundario("Tiempos de llegada");
         botones.add(btnLlegadas);
+        btnDiagrama = crearBotonSecundario("Diagrama");
+        botones.add(btnDiagrama);
 
         JPanel informacion = new JPanel(
                 new FlowLayout(
@@ -1705,6 +1708,8 @@ public class VentanaPrincipal extends JFrame {
     // =================================================
     // GETTERS PARA EL CONTROLADOR
     // =================================================
+
+    public JButton getBtnDiagrama() { return btnDiagrama; }
 
     public JButton getBtnConfiguracion() {
         return btnConfiguracion;
