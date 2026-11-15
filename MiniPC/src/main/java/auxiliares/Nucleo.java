@@ -232,14 +232,8 @@ public class Nucleo {
     public CPU getCpu() { 
         return cpu; 
     }
-    public Despachador getDespachador() { 
-        return despachador; 
-    }
     public Proceso getProcesoActual() { 
         return despachador.getProcesoActual(); 
-    }
-    public List<Proceso> getProcesos() { 
-        return new ArrayList<>(procesos); 
     }
     public List<Proceso> getProcesosPreparados() { 
         return new ArrayList<>(listos); 

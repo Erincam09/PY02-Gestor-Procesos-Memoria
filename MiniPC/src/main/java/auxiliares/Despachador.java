@@ -8,10 +8,6 @@ public class Despachador {
     private final int idNucleo;
     private Proceso procesoActual;
 
-    public Despachador(CPU cpu) {
-        this(cpu, 0);
-    }
-
     public Despachador(CPU cpu, int idNucleo) {
         if (cpu == null || idNucleo < 0 || idNucleo >= modelo.ConfiguracionSistema.maxNucleos) {
             throw new IllegalArgumentException("CPU o identificador de núcleo inválido");

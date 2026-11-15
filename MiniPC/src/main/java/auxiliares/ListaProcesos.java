@@ -19,36 +19,8 @@ public class ListaProcesos {
         }
     }
 
-    public Proceso obtenerProceso(int indice) {
-        if (indice < 0 || indice >= procesos.size()) {
-            throw new IndexOutOfBoundsException("Índice fuera de rango: " + indice);
-        }
-        return procesos.get(indice);
-    }
-
-    public Proceso buscarProcesoPorId(int id) {
-        for (Proceso proceso : procesos) {
-            if (proceso.getPid() == id) {
-                return proceso;
-            }
-        }
-        return null; 
-    }
-
     public ArrayList<Proceso> getProcesos() {
         return procesos;
-    }
-
-    public int cantidadProcesos() {
-        return procesos.size();
-    }
-
-    public boolean estaVacia() {
-        return procesos.isEmpty();
-    }
-
-    public void limpiar() {
-        procesos.clear();
     }
 
     public void eliminarProceso(Proceso proceso) {

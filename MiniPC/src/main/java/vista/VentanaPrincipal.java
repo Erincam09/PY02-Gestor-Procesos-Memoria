@@ -7,7 +7,6 @@ import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-import java.util.List;
 
 import controlador.MiniPCControlador;
 import modelo.ConfiguracionSistema;
@@ -68,8 +67,7 @@ public class VentanaPrincipal extends JFrame {
     // -------------------- CONSOLA --------------------
 
     private JTextArea txtPantalla;
-    //private JTextField txtEntradaTeclado;
-    //private JButton btnEnviarEntrada;
+
 
     // -------------------- EJECUCIÓN --------------------
 
@@ -770,53 +768,7 @@ public class VentanaPrincipal extends JFrame {
                 BorderLayout.CENTER
         );
 
-        /* 
-        JPanel entrada = new JPanel(
-                new BorderLayout(
-                        8,
-                        0
-                )
-        );
-
         
-        entrada.setOpaque(false);
-
-
-        entrada.add(
-                etiquetaSecundaria(
-                        "Entrada teclado (0-255):"
-                ),
-                BorderLayout.WEST
-        );
-
-        
-        txtEntradaTeclado = crearCampo(
-                "",
-                14
-        );
-        
-        btnEnviarEntrada = crearBotonSecundario(
-                "Enviar"
-        );
-
-        
-        entrada.add(
-                txtEntradaTeclado,
-                BorderLayout.CENTER
-        );
-        
-
-        entrada.add(
-                btnEnviarEntrada,
-                BorderLayout.EAST
-        );
-        
-
-        consola.add(
-                entrada,
-                BorderLayout.SOUTH
-        );
-         */
         return consola;
     }
 
@@ -1264,42 +1216,6 @@ public class VentanaPrincipal extends JFrame {
         );
     }
 
-    private JTextField crearCampo(
-            String texto,
-            int columnas) {
-
-        JTextField campo = new JTextField(
-                texto,
-                columnas
-        );
-
-        campo.setFont(
-                new Font(
-                        "Segoe UI",
-                        Font.PLAIN,
-                        12
-                )
-        );
-
-        campo.setForeground(TEXTO);
-        campo.setBackground(PANEL_2);
-        campo.setCaretColor(TEXTO);
-
-        campo.setBorder(
-                new CompoundBorder(
-                        new LineBorder(BORDE),
-                        new EmptyBorder(
-                                5,
-                                7,
-                                5,
-                                7
-                        )
-                )
-        );
-
-        return campo;
-    }
-
     private JButton crearBotonPrimario(String texto) {
 
         JButton boton = crearBotonBase(texto);
@@ -1422,24 +1338,6 @@ public class VentanaPrincipal extends JFrame {
                 + "</html>";
     }
 
-    private JLabel etiquetaSecundaria(
-            String texto) {
-
-        JLabel label = new JLabel(texto);
-
-        label.setFont(
-                new Font(
-                        "Segoe UI",
-                        Font.PLAIN,
-                        11
-                )
-        );
-
-        label.setForeground(TEXTO_SEC);
-
-        return label;
-    }
-
     private JLabel crearPuntoLeyenda(
             String texto,
             Color color) {
@@ -1528,7 +1426,7 @@ public class VentanaPrincipal extends JFrame {
         btnSiguiente.setEnabled(false);
         btnEjecutarAutomatico.setEnabled(false);
         btnReiniciar.setEnabled(false);
-        //btnEnviarEntrada.setEnabled(false);
+
         btnEstadisticas.setEnabled(false);
     }
 
@@ -1646,45 +1544,13 @@ public class VentanaPrincipal extends JFrame {
     public JButton getBtnEstadisticas() {
         return btnEstadisticas;
     }
-    /*
-    public JButton getBtnEnviarEntrada() {
-        return btnEnviarEntrada;
-    }
     
-    public JTextField getTxtEntradaTeclado() {
-        return txtEntradaTeclado;
-    }
-        */
-    public JTextArea getTxtPantalla() {
-        return txtPantalla;
-    }
-
     public JTable getTblMemoria() {
         return tblMemoria;
     }
 
     public void setParticionesMemoria(int[] particiones) {
         particionesMemoria = particiones;
-    }
-
-    public JTable getTblDisco() {
-        return tblDisco;
-    }
-
-    public JTable getTblMemoriaVirtual() {
-        return tblMemoriaVirtual;
-    }
-
-    public JTable getTblTrabajos() {
-        return tblTrabajos;
-    }
-
-    public JTable getTblProcesos() {
-        return tblProcesos;
-    }
-
-    public JTable getTblBCP() {
-        return tblBCP;
     }
 
     public DefaultTableModel getModeloMemoria() {

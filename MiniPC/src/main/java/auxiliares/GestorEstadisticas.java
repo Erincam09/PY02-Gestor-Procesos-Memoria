@@ -19,16 +19,6 @@ public class GestorEstadisticas {
         for (EstadisticaSimulacion e : ejecuciones) total += e.getFinalizados();
         return total;
     }
-    public int getErrores() {
-        int total = 0;
-        for (EstadisticaSimulacion e : ejecuciones) total += e.getErrores();
-        return total;
-    }
-    public int getRechazados() {
-        int total = 0;
-        for (EstadisticaSimulacion e : ejecuciones) total += e.getRechazados();
-        return total;
-    }
     public long getTiempoOciosoTotal() {
         long total = 0;
         for (EstadisticaSimulacion e : ejecuciones) total += e.getTiempoOciosoTotal();
@@ -39,15 +29,6 @@ public class GestorEstadisticas {
         for (EstadisticaSimulacion e : ejecuciones) {
             for (EstadisticaProceso p : e.getProcesos()) {
                 if (p.isFinalizado()) suma += p.getEstancia();
-            }
-        }
-        return getFinalizados() == 0 ? 0 : suma / getFinalizados();
-    }
-    public double getPromedioEspera() {
-        double suma = 0;
-        for (EstadisticaSimulacion e : ejecuciones) {
-            for (EstadisticaProceso p : e.getProcesos()) {
-                if (p.isFinalizado()) suma += p.getEspera();
             }
         }
         return getFinalizados() == 0 ? 0 : suma / getFinalizados();

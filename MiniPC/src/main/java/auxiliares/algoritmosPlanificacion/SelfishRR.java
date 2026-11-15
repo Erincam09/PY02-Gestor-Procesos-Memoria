@@ -45,7 +45,7 @@ public class SelfishRR implements AlgoritmoPlanificacion {
         }
 
         if (listos.isEmpty()) {
-            return null;
+            return actual;
         }
 
        

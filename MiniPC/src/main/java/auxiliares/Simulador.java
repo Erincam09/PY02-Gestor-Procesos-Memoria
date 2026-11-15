@@ -153,8 +153,7 @@ public class Simulador {
             int alcance = programa.getCantInstrucciones();
             if (!estrategiaMemoria.puedeAlojar(memoria, alcance)) {
                 trabajo.setEstado("RECHAZADO");
-                resultadosProcesos.add(new EstadisticaProceso(trabajo, reloj,
-                        "El programa no cabe con la estrategia de memoria seleccionada"));
+                resultadosProcesos.add(new EstadisticaProceso(trabajo, reloj));
                 salida.accept("Programa rechazado por tamaño: " + programa.getNombreArchivo() + "\n");
                 continue;
             }
@@ -189,7 +188,7 @@ public class Simulador {
         Proceso proceso = resultado.getProceso();
         BCP bcp = proceso.getBcp();
         // Conservar el resultado antes de liberar el BCP y eliminar el proceso.
-        resultadosProcesos.add(new EstadisticaProceso(proceso, resultado.getError()));
+        resultadosProcesos.add(new EstadisticaProceso(proceso));
         if (proceso.getAsignacionMemoria() != null) {
             estrategiaMemoria.liberar(memoria, proceso.getAsignacionMemoria());
         }
@@ -278,5 +277,4 @@ public class Simulador {
     public EstrategiaMemoria getEstrategiaMemoria() { return estrategiaMemoria; }
     public MemoriaVirtual getMemoriaVirtual() { return memoriaVirtual; }
     public AlmacenamientoSecundario getDisco() { return disco; }
-    public ManejoBCP getManejoBCP() { return manejoBCP; }
 }

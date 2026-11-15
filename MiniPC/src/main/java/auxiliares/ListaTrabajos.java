@@ -20,13 +20,6 @@ public class ListaTrabajos {
         return trabajo;
     }
 
-    public Trabajo obtenerTrabajo(int indice) {
-        if (indice < 0 || indice >= trabajos.size()) {
-            throw new IndexOutOfBoundsException("Índice fuera de rango: " + indice);
-        }
-        return trabajos.get(indice);
-    }
-
     public ArrayList<Trabajo> getTrabajos() {
         return trabajos;
     }
@@ -39,8 +32,4 @@ public class ListaTrabajos {
         return trabajos.isEmpty();
     }
 
-    public void limpiar() {
-        trabajos.clear();
-        siguienteId = 1;
-    }
 }

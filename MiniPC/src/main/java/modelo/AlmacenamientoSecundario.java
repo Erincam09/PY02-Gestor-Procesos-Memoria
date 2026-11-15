@@ -10,7 +10,7 @@ public class AlmacenamientoSecundario {
     private int inicioMemoriaVirtual;
 
     public AlmacenamientoSecundario(int tamanio, int tamanioMemoriaVirtual) {
-        tamanioIndice = 20;
+        tamanioIndice = ConfiguracionSistema.maxProcesosTotal;
         if (tamanioMemoriaVirtual <= 0) {
             throw new IllegalArgumentException("La memoria virtual debe ser mayor que cero");
         }

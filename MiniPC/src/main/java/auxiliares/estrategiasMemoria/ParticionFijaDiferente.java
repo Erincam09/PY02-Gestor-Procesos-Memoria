@@ -17,10 +17,6 @@ public class ParticionFijaDiferente implements EstrategiaMemoria {
         this.tamanios = new ArrayList<>(tamanios);
     }
     
-    public List<Integer> getTamanios() {
-        return new ArrayList<>(tamanios);
-    }
-
     
     public String getNombre() {
         return "Partición Fija Diferente";

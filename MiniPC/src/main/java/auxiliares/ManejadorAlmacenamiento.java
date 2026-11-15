@@ -146,11 +146,4 @@ public class ManejadorAlmacenamiento {
         }
     }
 
-    public ArrayList<ArchivoSimulado> getIndice() {
-        return indice;
-    }
-
-    public AlmacenamientoSecundario getAlmacenamiento() {
-        return almacenamiento;
-    }
 }

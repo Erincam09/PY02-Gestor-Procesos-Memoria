@@ -18,21 +18,4 @@ public class GestorAdmisionTrabajos {
         return pendientes;
     }
 
-    public Trabajo obtenerSiguienteTrabajo() {
-        for (Trabajo trabajo : listaTrabajos.getTrabajos()) {
-            if (trabajo.getEstado().equals("PENDIENTE")) {
-                return trabajo;
-            }
-        }
-        return null;
-    }
-
-    public boolean hayTrabajosPendientes() {
-        for (Trabajo trabajo : listaTrabajos.getTrabajos()) {
-            if (trabajo.getEstado().equals("PENDIENTE")) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

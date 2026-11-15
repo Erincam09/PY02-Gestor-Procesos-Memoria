@@ -35,7 +35,6 @@ public class DialogoConfiguracion extends JDialog {
     private JSpinner spinnerPagina;
     private JTextField txtTamanios;
 
-    private JSpinner spinnerQuantumSRR;
     private JSpinner spinnerASRR;
     private JSpinner spinnerBSRR;
 

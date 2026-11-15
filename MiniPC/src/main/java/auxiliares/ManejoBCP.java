@@ -57,11 +57,6 @@ public class ManejoBCP {
         return bcp;
     }
 
-    public BCP crearBCP(Memoria memoria, int pid, CPU cpu, int base, int alcance, int prioridad) {
-        String ubicacion = base >= 0 ? "RAM" : "VIRTUAL";
-        return crearBCP(memoria, pid, cpu, base, alcance, prioridad, "Programa PID " + pid, ubicacion);
-    }
-
     private int buscarEspacioBCP(Memoria memoria) {
         int inicio = memoria.getEspacioKernel() - TAMANIO;
 
@@ -83,44 +78,8 @@ public class ManejoBCP {
         return -1;
     }
 
-    public void actualizarBCP(Memoria memoria, BCP bcp, String estado, CPU cpu) {
-        bcp.setEstado(estado);
-        bcp.setPc(cpu.getPC());
-        bcp.setAc(cpu.getAC());
-        bcp.setAx(cpu.getRegistro("AX"));
-        bcp.setAl(cpu.getRegistro("AL"));
-        bcp.setAh(cpu.getAH());
-        bcp.setBx(cpu.getRegistro("BX"));
-        bcp.setCx(cpu.getRegistro("CX"));
-        bcp.setDx(cpu.getDX());
-        bcp.setIr(cpu.getIR());
-        bcp.setComparacionIgual(cpu.isComparacionIgual());
-
-        if (!estado.equals("EJECUCION")) {
-            bcp.setCpu(-1);
-        }
-
-        guardarEnMemoria(memoria, bcp);
-    }
-
-    public void actualizarBCP(Memoria memoria, int numeroProceso, String estado, CPU cpu) {
-        if (numeroProceso < 0 || numeroProceso >= listaBCP.size()) {
-            throw new IllegalArgumentException("Proceso inválido.");
-        }
-
-        actualizarBCP(memoria, listaBCP.get(numeroProceso), estado, cpu);
-    }
-
     public void sincronizarBCP(Memoria memoria, BCP bcp) {
         guardarEnMemoria(memoria, bcp);
-    }
-
-    public void sincronizarBCP(Memoria memoria, int numeroProceso) {
-        if (numeroProceso < 0 || numeroProceso >= listaBCP.size()) {
-            throw new IllegalArgumentException("Proceso inválido.");
-        }
-
-        sincronizarBCP(memoria, listaBCP.get(numeroProceso));
     }
 
     private void guardarEnMemoria(Memoria memoria, BCP bcp) {
@@ -165,27 +124,6 @@ public class ManejoBCP {
         memoria.escribir(inicio + 24, "PRIORIDAD: " + bcp.getPrioridad());
     }
 
-    public void actualizarUbicacionPrograma(Memoria memoria, int pid, String ubicacion, int base) {
-        BCP bcp = obtenerBCPPorPid(pid);
-
-        if (bcp == null) {
-            throw new IllegalArgumentException("No existe el BCP del PID " + pid + ".");
-        }
-
-        bcp.setUbicacionPrograma(ubicacion);
-        bcp.setBase(base);
-
-        if (bcp.getEstado().equals("EN ESPERA")) {
-            bcp.setPc(base);
-        }
-
-        guardarEnMemoria(memoria, bcp);
-    }
-
-    public void actualizarIndicePrograma(Memoria memoria, int pid, String ubicacion, int base) {
-        actualizarUbicacionPrograma(memoria, pid, ubicacion, base);
-    }
-
     public void liberarBCP(Memoria memoria, int pid) {
         BCP bcp = obtenerBCPPorPid(pid);
 
@@ -227,16 +165,6 @@ public class ManejoBCP {
         return null;
     }
 
-    public int obtenerDireccionBCP(int pid) {
-        BCP bcp = obtenerBCPPorPid(pid);
-
-        if (bcp == null) {
-            return -1;
-        }
-
-        return bcp.getDireccionBCP();
-    }
-
     public boolean hayEspacioParaBCP(Memoria memoria) {
         return listaBCP.size() < ConfiguracionSistema.maxProcesosTotal && buscarEspacioBCP(memoria) != -1;
     }
@@ -245,15 +173,4 @@ public class ManejoBCP {
         return TAMANIO;
     }
 
-    public ArrayList<BCP> getListaBCP() {
-        return listaBCP;
-    }
-
-    public int cantidadBCP() {
-        return listaBCP.size();
-    }
-
-    public void limpiar() {
-        listaBCP.clear();
-    }
 }

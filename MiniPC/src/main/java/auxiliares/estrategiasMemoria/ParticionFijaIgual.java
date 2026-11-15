@@ -16,10 +16,6 @@ public class ParticionFijaIgual implements EstrategiaMemoria {
         this.particiones = particiones;
     } 
 
-    public int getParticiones() {
-        return particiones;
-    }
-
     public String getNombre() {
         return "Partición Fija Igual";
     }

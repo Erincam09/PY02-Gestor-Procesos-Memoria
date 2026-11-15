@@ -49,11 +49,6 @@ public class DialogoDiagrama extends JDialog {
         setLocationRelativeTo(padre);
     }
 
-    public void actualizar(List<RegistroGantt> historial, int reloj,
-            int cantidadNucleos, String algoritmo) {
-        actualizar(historial, new ArrayList<>(), reloj, cantidadNucleos, algoritmo);
-    }
-
     public void actualizar(List<RegistroGantt> historial, List<Proceso> procesos,
             int reloj, int cantidadNucleos, String algoritmo) {
         resumen.setText(algoritmo + "   |   Reloj: " + reloj + " s");
