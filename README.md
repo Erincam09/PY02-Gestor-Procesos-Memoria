@@ -134,5 +134,5 @@ MiniPC/
 
 ## Video de demostración
 
-**Enlace al video en YouTube:**
+**Enlace al video en YouTube: https://youtu.be/AmNnYMgYZz8**
 
